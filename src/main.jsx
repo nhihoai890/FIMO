@@ -11,6 +11,7 @@ import CitiesProvider from "./contexts/CitiesProvider";
 import MovieProvider from "./contexts/MovieProvider";
 import CinemaLocationProvider from "./contexts/CinemaLocationProvider";
 import TypeChairProvider from "./contexts/TypeChairProvider";
+import RoomProvider from "./contexts/RoomProvider";
 
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -23,7 +24,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               <MovieProvider>
                 <CinemaLocationProvider>
                   <TypeChairProvider>
-                    <App />
+                    <RoomProvider>
+                      <App />
+                    </RoomProvider>
+
                   </TypeChairProvider>
                 </CinemaLocationProvider>
               </MovieProvider>
