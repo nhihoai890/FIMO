@@ -8,7 +8,6 @@ import {
     DialogTitle,
     Slide,
     TextField,
-    Typography,
     Box,
 } from "@mui/material";
 import { styled } from '@mui/material/styles';
@@ -17,36 +16,45 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-// Styled components
-const GradientButton = styled(Button)(({ theme }) => ({
-    background: 'linear-gradient(135deg, #5CA8FF, #9B8FFF)',
+// Cyber neon button
+const NeonButton = styled(Button)(() => ({
+    background: 'linear-gradient(135deg, #0ff, #f0f)',
     color: '#fff',
     fontWeight: 600,
-    borderRadius: 10,
+    borderRadius: 12,
     textTransform: 'none',
+    boxShadow: '0 0 8px #0ff, 0 0 15px #f0f',
     '&:hover': {
-        background: 'linear-gradient(135deg, #81BFFF, #B3A1FF)',
-        boxShadow: '0 0 10px rgba(92,168,255,0.4)',
+        transform: 'scale(1.05)',
+        boxShadow: '0 0 12px #0ff, 0 0 25px #f0f',
     },
 }));
 
-const GradientDialogTitle = styled(DialogTitle)(() => ({
-    background: 'linear-gradient(90deg, #5CA8FF, #9B8FFF)',
+// Cyber neon dialog title
+const NeonDialogTitle = styled(DialogTitle)(() => ({
+    background: 'linear-gradient(90deg, #0ff, #f0f)',
     color: '#fff',
     fontWeight: 700,
     borderRadius: '16px 16px 0 0',
     textAlign: 'center',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+    boxShadow: '0 2px 12px rgba(0,255,255,0.3), 0 2px 12px rgba(255,0,255,0.3)',
 }));
 
-const GradientAvatar = styled(Avatar)(() => ({
-    width: 100,
-    height: 100,
-    border: '3px solid #5CA8FF',
-    boxShadow: '0 4px 12px rgba(92,168,255,0.3)',
+// Cyber neon Avatar
+const NeonAvatar = styled(Avatar)(() => ({
+    width: 120,
+    height: 120,
+    borderRadius: '16px',
+    border: '3px solid #0ff',
+    boxShadow: '0 0 15px #0ff, 0 0 25px #f0f',
+    transition: '0.3s',
+    '&:hover': {
+        transform: 'scale(1.1)',
+        boxShadow: '0 0 25px #0ff, 0 0 40px #f0f, inset 0 0 10px #fff',
+    },
 }));
 
-function ModalActors({ open, handleClose, handleInput, addActors, errorText, actor, handleImageChange }) {
+function ModalActorsCyber({ open, handleClose, handleInput, addActors, errorText, actor, handleImageChange }) {
     return (
         <Dialog
             open={open}
@@ -58,16 +66,16 @@ function ModalActors({ open, handleClose, handleInput, addActors, errorText, act
             PaperProps={{
                 sx: {
                     borderRadius: 3,
-                    p: 2,
-                    background: '#1E1E1E', // dark mode background
-                    color: '#E0E0E0',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                   
+                    background: '#1a1a2e',
+                    color: '#fff',
+                    boxShadow: '0 4px 25px rgba(0,0,0,0.6)',
                 },
             }}
         >
-            <GradientDialogTitle>
+            <NeonDialogTitle>
                 {actor.id ? "Edit Actor" : "Add Actor"}
-            </GradientDialogTitle>
+            </NeonDialogTitle>
 
             <DialogContent dividers>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -86,14 +94,14 @@ function ModalActors({ open, handleClose, handleInput, addActors, errorText, act
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 borderRadius: 2,
-                                backgroundColor: '#2A2A2A',
-                                color: '#fff',
+                                backgroundColor: '#2a2a40',
+                                color: '#0ff',
                                 '& fieldset': { borderColor: '#444' },
-                                '&:hover fieldset': { borderColor: '#5CA8FF' },
-                                '&.Mui-focused fieldset': { borderColor: '#81BFFF' },
+                                '&:hover fieldset': { borderColor: '#0ff' },
+                                '&.Mui-focused fieldset': { borderColor: '#f0f' },
                             },
-                            '& .MuiInputLabel-root': { color: '#bbb' },
-                            '& .MuiFormHelperText-root': { color: '#FF8A80' },
+                            '& .MuiInputLabel-root': { color: '#0ff' },
+                            '& .MuiFormHelperText-root': { color: '#ff0080' },
                         }}
                     />
 
@@ -113,25 +121,25 @@ function ModalActors({ open, handleClose, handleInput, addActors, errorText, act
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 borderRadius: 2,
-                                backgroundColor: '#2A2A2A',
-                                color: '#fff',
+                                backgroundColor: '#2a2a40',
+                                color: '#0ff',
                                 '& fieldset': { borderColor: '#444' },
-                                '&:hover fieldset': { borderColor: '#5CA8FF' },
-                                '&.Mui-focused fieldset': { borderColor: '#81BFFF' },
+                                '&:hover fieldset': { borderColor: '#0ff' },
+                                '&.Mui-focused fieldset': { borderColor: '#f0f' },
                             },
-                            '& .MuiInputLabel-root': { color: '#bbb' },
-                            '& .MuiFormHelperText-root': { color: '#FF8A80' },
+                            '& .MuiInputLabel-root': { color: '#0ff' },
+                            '& .MuiFormHelperText-root': { color: '#ff0080' },
                         }}
                     />
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
-                        <GradientAvatar
+                        <NeonAvatar
                             key={actor.imgUrl}
                             src={actor.imgUrl}
                             alt="Avatar Preview"
                         />
 
-                        <GradientButton component="label">
+                        <NeonButton component="label">
                             Chọn ảnh
                             <input
                                 type="file"
@@ -139,21 +147,21 @@ function ModalActors({ open, handleClose, handleInput, addActors, errorText, act
                                 hidden
                                 onChange={handleImageChange}
                             />
-                        </GradientButton>
+                        </NeonButton>
                     </Box>
                 </Box>
             </DialogContent>
 
             <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 2 }}>
-                <Button onClick={handleClose} sx={{ color: '#FF8A80', fontWeight: 600 }}>
+                <Button onClick={handleClose} sx={{ color: '#ff0080', fontWeight: 600 }}>
                     Cancel
                 </Button>
-                <GradientButton onClick={addActors}>
+                <NeonButton onClick={addActors}>
                     {actor.id ? "Update" : "Add"}
-                </GradientButton>
+                </NeonButton>
             </DialogActions>
         </Dialog>
     );
 }
 
-export default ModalActors;
+export default ModalActorsCyber;

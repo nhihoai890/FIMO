@@ -1,47 +1,40 @@
 import React, { useContext, useState } from 'react';
 import { styled } from '@mui/material/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Box, Tooltip } from '@mui/material';
 import { FaPen, FaTrash } from 'react-icons/fa';
-import { Button } from '@mui/material';
 import { CitiesContext } from '../../../../contexts/CitiesProvider';
 import ModalDeleted from '../../../../components/admin/ModalDeleted';
 import { deleteDocument } from '../../../../services/firebaseService';
 import PaginationTablePage from '../../../../components/admin/PaginationTablePage';
 
 
-const StyledTableCell = styled(TableCell)(() => ({
+const NeonCell = styled(TableCell)(() => ({
+    border: 'none', // bỏ viền hoàn toàn
     '&.MuiTableCell-head': {
-        background: 'linear-gradient(90deg, #5CA8FF 0%, #9B8FFF 100%)',
-        color: '#FFFFFF',
+        backgroundColor: '#111827', // header tối, dễ nhìn
+        color: '#0ff', // chữ neon cyan
         fontWeight: 600,
         fontSize: 15,
-        borderBottom: '1px solid #2C2C2C',
+        textTransform: 'uppercase',
     },
     '&.MuiTableCell-body': {
         color: '#E0E0E0',
-        borderBottom: '1px solid #2A2A2A',
         fontSize: 14,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
     },
 }));
 
-const StyledTableRow = styled(TableRow)(() => ({
-    backgroundColor: '#1A1A1A',
-    transition: 'all 0.25s ease',
+const NeonRow = styled(TableRow)(() => ({
+    backgroundColor: '#1A1A1A', 
+    transition: 'all 0.3s ease',
     '&:nth-of-type(odd)': {
         backgroundColor: '#1F1F1F',
     },
     '&:hover': {
-        background: 'linear-gradient(90deg, rgba(92,168,255,0.08), rgba(155,143,255,0.08))', // hover gradient mờ, nhẹ
-        transform: 'scale(1.002)',
-    },
-    '&:last-child td, &:last-child th': {
-        border: 0,
+        background: 'rgba(0,255,255,0.1)', // hover nhẹ, không gradient chói
+        boxShadow: '0 0 10px rgba(0,255,255,0.2)',
     },
 }));
 
@@ -53,94 +46,104 @@ function TableCities({ handleEditCities }) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
-    const handleChangePage = (event, newPage) => {
-        setPage(newPage);
-    };
-
+    const handleChangePage = (event, newPage) => setPage(newPage);
     const handleChangeRowsPerPage = (event) => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
+
     const handleDeleted = async () => {
         await deleteDocument("cities", citiesDelete);
         handleClose();
-    }
-    const handleClose = () => {
-        setOpen(false);
     };
-
+    const handleClose = () => setOpen(false);
     const handleClickOpen = (row) => {
         setOpen(true);
         setCitiesDelete(row);
-    }
+    };
+
     return (
-        <div>
+        <Box>
             <TableContainer component={Paper} sx={{
-                mt: 3, p: 2, backgroundColor: '#1E1E1E',
-                borderRadius: 2,
-                overflow: 'hidden',
-                boxShadow: '0 0 10px rgba(255,255,255,0.05)',
+                mt: 3, p: 2,
+                background: 'linear-gradient(180deg, #1A1A2E, #1E1E3A)',
+                borderRadius: 3,
+                boxShadow: '0 0 20px rgba(0,255,255,0.05)',
             }}>
-                <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                <Table sx={{ minWidth: 650 }} aria-label="cities table">
                     <TableHead>
                         <TableRow>
-                            <StyledTableCell>ID</StyledTableCell>
-                            <StyledTableCell >Name</StyledTableCell>
-                            <StyledTableCell >Description</StyledTableCell>
-                            <StyledTableCell >Image</StyledTableCell>
-                            <StyledTableCell align="center" >Action</StyledTableCell>
+                            <NeonCell>ID</NeonCell>
+                            <NeonCell>Name</NeonCell>
+                            <NeonCell>Description</NeonCell>
+                            <NeonCell>Image</NeonCell>
+                            <NeonCell align="center">Action</NeonCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {cities.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((ct, index) => {
-                            return (
-                                <StyledTableRow key={ct.id}>
-                                    <StyledTableCell component="th" scope="row">
-                                        {page * rowsPerPage + index + 1}
-                                    </StyledTableCell>
-                                    <StyledTableCell>{ct.name}</StyledTableCell>
-                                    <StyledTableCell>{ct.description}</StyledTableCell>
-                                    <StyledTableCell>
-                                        <img src={ct.imgUrl} alt={ct.name} className="w-15 h-15 object-cover rounded-full" />
-                                    </StyledTableCell>
-                                    <StyledTableCell align="center">
-                                        <Button sx={{
-                                            mr: 1,
-                                            background: 'linear-gradient(135deg, #4FC3F7, #81D4FA)',
-                                            color: '#000',
-                                            borderRadius: '8px',
-                                            fontWeight: 600,
-                                            textTransform: 'none',
-                                            '&:hover': {
-                                                background: 'linear-gradient(135deg, #81D4FA, #B3E5FC)',
-                                                boxShadow: '0 0 8px rgba(79,195,247,0.3)',
-                                            },
-                                        }} onClick={() => handleEditCities(ct)} variant="contained" size="small" color="primary" >
+                        {cities.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((ct, index) => (
+                            <NeonRow key={ct.id}>
+                                <NeonCell>{page * rowsPerPage + index + 1}</NeonCell>
+                                <NeonCell>{ct.name}</NeonCell>
+                                <NeonCell title={ct.description}>{ct.description}</NeonCell>
+                                <NeonCell>
+                                    <Box component="img"
+                                        src={ct.imgUrl}
+                                        alt={ct.name}
+                                        sx={{
+                                            width: 50,
+                                            height: 50,
+                                            borderRadius: '50%',
+                                            border: '2px solid #0ff',
+                                            boxShadow: '0 0 8px #0ff, 0 0 12px #f0f',
+                                        }}
+                                    />
+                                </NeonCell>
+                                <NeonCell align="center">
+                                    <Tooltip title="Edit">
+                                        <Button
+                                            onClick={() => handleEditCities(ct)}
+                                            sx={{
+                                                mr: 1,
+                                                background: 'linear-gradient(90deg, #0ff, #f0f)',
+                                                color: '#000',
+                                                borderRadius: '8px',
+                                                minWidth: 36,
+                                                '&:hover': { boxShadow: '0 0 10px #0ff, 0 0 15px #f0f' },
+                                            }}
+                                        >
                                             <FaPen />
                                         </Button>
-                                        <Button sx={{
-                                            background: 'linear-gradient(135deg, #FF8A80, #FFB0B0)',
-                                            color: '#fff',
-                                            borderRadius: '8px',
-                                            fontWeight: 600,
-                                            textTransform: 'none',
-                                            '&:hover': {
-                                                background: 'linear-gradient(135deg, #FFB0B0, #FFC1C1)',
-                                                boxShadow: '0 0 8px rgba(255,138,128,0.3)',
-                                            },
-                                        }} variant="contained" size="small" color="error" onClick={() => handleClickOpen(ct)}>
+                                    </Tooltip>
+                                    <Tooltip title="Delete">
+                                        <Button
+                                            onClick={() => handleClickOpen(ct)}
+                                            sx={{
+                                                background: 'linear-gradient(90deg, #ff0080, #ff4b2b)',
+                                                color: '#fff',
+                                                borderRadius: '8px',
+                                                minWidth: 36,
+                                                '&:hover': { boxShadow: '0 0 10px #ff0080, 0 0 15px #ff4b2b' },
+                                            }}
+                                        >
                                             <FaTrash />
                                         </Button>
-                                    </StyledTableCell>
-                                </StyledTableRow>
-                            );
-                        })}
+                                    </Tooltip>
+                                </NeonCell>
+                            </NeonRow>
+                        ))}
                     </TableBody>
                 </Table>
-                <PaginationTablePage data={cities} page={page} handleChangePage={handleChangePage} rowsPerPage={rowsPerPage} handleChangeRowsPerPage={handleChangeRowsPerPage} />
+                <PaginationTablePage
+                    data={cities}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    handleChangePage={handleChangePage}
+                    handleChangeRowsPerPage={handleChangeRowsPerPage}
+                />
             </TableContainer>
             <ModalDeleted open={open} handleClose={handleClose} handleDeleted={handleDeleted} />
-        </div>
+        </Box>
     );
 }
 

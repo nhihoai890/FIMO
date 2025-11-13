@@ -12,6 +12,8 @@ import MovieProvider from "./contexts/MovieProvider";
 import CinemaLocationProvider from "./contexts/CinemaLocationProvider";
 import TypeChairProvider from "./contexts/TypeChairProvider";
 import RoomProvider from "./contexts/RoomProvider";
+import FoodProvider from "./contexts/FoodProvider";
+import { MovieScreeningContext } from "./contexts/MovieScreeningProvider";
 
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -25,9 +27,12 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                 <CinemaLocationProvider>
                   <TypeChairProvider>
                     <RoomProvider>
-                      <App />
+                      <FoodProvider>
+                        <MovieScreeningContext>
+                          <App />
+                        </MovieScreeningContext>
+                      </FoodProvider>
                     </RoomProvider>
-
                   </TypeChairProvider>
                 </CinemaLocationProvider>
               </MovieProvider>

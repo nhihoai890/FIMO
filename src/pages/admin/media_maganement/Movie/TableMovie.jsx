@@ -1,195 +1,184 @@
 import React, { useContext, useState } from 'react';
-import { styled } from '@mui/material/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Button, Tooltip, Box
+} from '@mui/material';
 import { MoviesContext } from '../../../../contexts/MovieProvider';
 import { DirectorsContext } from '../../../../contexts/DirectorsProvider';
 import { getOjectById } from '../../../../utils/functionContants';
 import { FaPen, FaTrash } from 'react-icons/fa';
-import { Button, Avatar, Box } from '@mui/material';
+import { PiFilmReelFill } from 'react-icons/pi';
 import { deleteDocument } from '../../../../services/firebaseService';
 import ModalDeleted from '../../../../components/admin/ModalDeleted';
-import { ActorsContext } from '../../../../contexts/ActorProvider';
-import { CategoriesContext } from '../../../../contexts/CategoryProvider';
-
-// Styled components
-const StyledTableCell = styled(TableCell)(() => ({
-  [`&.${tableCellClasses.head}`]: {
-    background: 'linear-gradient(90deg, #5C6BC0, #7E57C2)',
-    color: '#E0E7FF',
-    fontWeight: 600,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    color: '#E8EAF6',
-  },
-}));
-
-const StyledTableRow = styled(TableRow)(() => ({
-  backgroundColor: 'rgba(255,255,255,0.05)',
-  backdropFilter: 'blur(5px)',
-  borderRadius: '12px',
-  margin: '4px 0',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    background: 'linear-gradient(90deg, rgba(92,107,192,0.15), rgba(126,87,194,0.15))',
-    boxShadow: '0 4px 20px rgba(126,87,194,0.3)',
-    transform: 'scale(1.002)',
-  },
-  '&:last-child td, &:last-child th': {
-    border: 0,
-  },
-}));
+import PaginationTablePage from '../../../../components/admin/PaginationTablePage';
+import ShowCategories from './ShowCategories';
+import ShowActors from './ShowActors';
 
 function TableMovie({ handleEditMovie }) {
   const movies = useContext(MoviesContext);
   const directors = useContext(DirectorsContext);
-  const actors = useContext(ActorsContext);
-  const categories = useContext(CategoriesContext);
   const [open, setOpen] = useState(false);
   const [movieDelete, setMovieDelete] = useState(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const handleChangePage = (event, newPage) => setPage(newPage);
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleClickOpen = (movie) => {
+    setMovieDelete(movie);
+    setOpen(true);
+  };
+
+  const handleClose = () => setOpen(false);
 
   const handleDeleted = async () => {
     await deleteDocument('movies', movieDelete);
     handleClose();
   };
-  const handleClickOpen = (row) => {
-    setOpen(true);
-    setMovieDelete(row);
-  };
-  const handleClose = () => setOpen(false);
-
-  function ShowActors({ data }) {
-    return (
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        {data.map(e => (
-          <Avatar
-            key={e}
-            src={getOjectById(actors, e)?.imgUrl}
-            sx={{
-              width: 32,
-              height: 32,
-              border: '2px solid #7E57C2',
-              boxShadow: '0 2px 6px rgba(126,87,194,0.3)',
-              '&:hover': { transform: 'scale(1.1)', transition: '0.2s' },
-            }}
-          />
-        ))}
-      </Box>
-    );
-  }
-
-  function ShowCategories({ data }) {
-    return (
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        {data.map(e => (
-          <Box
-            key={e}
-            sx={{
-              px: 1.5,
-              py: 0.5,
-              borderRadius: 2,
-              background: 'rgba(126,87,194,0.15)',
-              color: '#E0E7FF',
-              fontSize: 12,
-              fontWeight: 500,
-            }}
-          >
-            {getOjectById(categories, e)?.name}
-          </Box>
-        ))}
-      </Box>
-    );
-  }
 
   return (
-    <div>
+    <Box>
       <TableContainer
         component={Paper}
         sx={{
-          mt: 3,
-          p: 2,
+          mt: 2,
           borderRadius: 3,
-          background: 'rgba(30,30,60,0.4)',
-          backdropFilter: 'blur(8px)',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-          border: '1px solid rgba(255,255,255,0.1)',
+          background: 'linear-gradient(145deg, #0a0a1f, #1a1a3f)',
+          boxShadow: '0 8px 24px rgba(0,255,255,0.1)',
+          border: '1px solid rgba(0,255,255,0.15)',
+          overflow: 'visible !important',
         }}
       >
-        <Table sx={{ minWidth: 700 }} aria-label="customized table">
+        <Table >
+          {/* Header */}
           <TableHead>
-            <TableRow>
-              <StyledTableCell>#</StyledTableCell>
-              <StyledTableCell>Image</StyledTableCell>
-              <StyledTableCell>Name</StyledTableCell>
-              <StyledTableCell>Director</StyledTableCell>
-              <StyledTableCell>Age Limit</StyledTableCell>
-              <StyledTableCell>Duration</StyledTableCell>
-              <StyledTableCell>Actors</StyledTableCell>
-              <StyledTableCell>Categories</StyledTableCell>
-              <StyledTableCell align="center">Action</StyledTableCell>
+            <TableRow sx={{ background: 'linear-gradient(90deg, #1f1f3a, #292952)' }}>
+              {['#', 'Image', 'Name', 'Director', 'Age', 'Duration', 'Actors', 'Categories', 'Action'].map((col, i) => (
+                <TableCell
+                  key={i}
+                  sx={{
+                    color: '#00eaff',
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    textTransform: 'uppercase',
+                    borderBottom: '2px solid rgba(0,238,255,0.2)',
+                  }}
+                >
+                  {col}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
+
+          {/* Body */}
           <TableBody>
-            {movies.map((mv, index) => (
-              <StyledTableRow key={mv.id}>
-                <StyledTableCell>{index + 1}</StyledTableCell>
-                <StyledTableCell>
-                  <img
-                    src={mv.imgUrl}
-                    alt=""
-                    className="w-16 h-20 rounded-lg shadow-lg hover:scale-105 transition-transform duration-200"
-                  />
-                </StyledTableCell>
-                <StyledTableCell>{mv.name}</StyledTableCell>
-                <StyledTableCell>{getOjectById(directors, mv.idDirector)?.name}</StyledTableCell>
-                <StyledTableCell>{mv.ageLimit}</StyledTableCell>
-                <StyledTableCell>{mv.duration}</StyledTableCell>
-                <StyledTableCell><ShowActors data={mv.listActor} /></StyledTableCell>
-                <StyledTableCell><ShowCategories data={mv.listCate} /></StyledTableCell>
-                <StyledTableCell align="center">
-                  <Button
-                    onClick={() => handleEditMovie(mv)}
-                    variant="contained"
-                    size="small"
-                    sx={{
-                      mr: 1,
-                      borderRadius: 2,
-                      background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
-                      '&:hover': { background: 'linear-gradient(90deg, #5a67d8 0%, #6b46c1 100%)' },
-                    }}
-                  >
-                    <FaPen />
-                  </Button>
-                  <Button
-                    sx={{
-                      background: 'linear-gradient(90deg, #ff4081, #d500f9)',
-                      boxShadow: '0 0 10px rgba(255,64,129,0.4)',
-                      transition: '0.3s',
-                      '&:hover': {
-                        background: 'linear-gradient(90deg, #d500f9, #ff4081)',
-                        boxShadow: '0 0 20px rgba(255,64,129,0.6)',
-                        transform: 'scale(1.05)',
-                      },
-                    }}
-                    onClick={() => handleClickOpen(mv)}
-                    variant="contained"
-                    size="small"
-                  >
-                    <FaTrash />
-                  </Button>
-                </StyledTableCell>
-              </StyledTableRow>
+            {movies.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((mv, index) => (
+              <TableRow
+                key={mv.id}
+                sx={{
+                  background: 'rgba(10,10,30,0.7)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'linear-gradient(90deg, rgba(0,238,255,0.08), rgba(155,143,255,0.08))',
+                    boxShadow: '0 0 15px rgba(0,255,255,0.2)',
+                    transform: 'scale(1.002)',
+                  },
+                  '& td': { borderBottom: 'none', color: '#e0e6ff' },
+                }}
+              >
+                <TableCell sx={{ color: '#00ffff' }}>{page * rowsPerPage + index + 1}</TableCell>
+
+                <TableCell>
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <img
+                      src={mv.imgUrl}
+                      alt={mv.name}
+                      style={{
+                        width: 60,
+                        height: 80,
+                        borderRadius: 6,
+                        objectFit: 'cover',
+                        boxShadow: '0 0 6px #00ffff',
+                      }}
+                    />
+                  </Box>
+                </TableCell>
+
+                <TableCell>{mv.name}</TableCell>
+                <TableCell>{getOjectById(directors, mv.idDirector)?.name}</TableCell>
+                <TableCell sx={{ color: '#ff55ff' }}>{mv.ageLimit}</TableCell>
+                <TableCell>{mv.duration} min</TableCell>
+
+                <TableCell>
+                  <ShowActors data={mv.listActor} />
+                </TableCell>
+
+                <TableCell>
+                  <Tooltip title={<ShowCategories data={mv.listCate || []} />} arrow>
+                    <PiFilmReelFill size={20} color="#00ffff" style={{ filter: 'drop-shadow(0 0 4px #00ffff)' }} />
+                  </Tooltip>
+                </TableCell>
+
+                <TableCell>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      onClick={() => handleEditMovie(mv)}
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        minWidth: 32,
+                        p: 1,
+                        borderRadius: 2,
+                        background: 'linear-gradient(90deg, #667eea, #764ba2)',
+                        '&:hover': { background: 'linear-gradient(90deg, #5a67d8, #6b46c1)' },
+                      }}
+                    >
+                      <FaPen />
+                    </Button>
+
+                    <Button
+                      onClick={() => handleClickOpen(mv)}
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        minWidth: 32,
+                        p: 1,
+                        borderRadius: 2,
+                        background: 'linear-gradient(90deg, #ff4081, #d500f9)',
+                        boxShadow: '0 0 10px rgba(255,64,129,0.4)',
+                        '&:hover': {
+                          background: 'linear-gradient(90deg, #d500f9, #ff4081)',
+                          boxShadow: '0 0 20px rgba(255,64,129,0.6)',
+                          transform: 'scale(1.05)',
+                        },
+                      }}
+                    >
+                      <FaTrash />
+                    </Button>
+                  </Box>
+                </TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Pagination */}
+      <PaginationTablePage
+        page={page}
+        handleChangePage={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        handleChangeRowsPerPage={handleChangeRowsPerPage}
+        data={movies}
+      />
+
+      {/* Delete Modal */}
       <ModalDeleted open={open} handleClose={handleClose} handleDeleted={handleDeleted} />
-    </div>
+    </Box>
   );
 }
 

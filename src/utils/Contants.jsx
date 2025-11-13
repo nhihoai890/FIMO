@@ -20,7 +20,7 @@ export const LISTMENU = [
 
     {
       
-       title : " MediaManagement",
+       title : "CinemaManager",
        icon : <CiImageOn />,
        items : [
          {

@@ -3,22 +3,22 @@ import { fetchDocumentsRealtime } from '../services/firebaseService';
 
 
 
- export const ActorsContext = createContext();
- 
-function ActorProvider({children}) {
-     const [actors, setActors] = useState([]);
+export const ActorsContext = createContext();
 
-     useEffect(() => {
-         const unsubscribe = fetchDocumentsRealtime("actors", (actorList) => {
-             setActors(actorList);
-         });
-          return () => unsubscribe();
-          
-     }, []);
+function ActorProvider({ children }) {
+    const [actors, setActors] = useState([]);
+
+    useEffect(() => {
+        const unsubscribe = fetchDocumentsRealtime("actors", (actorList) => {
+            setActors(actorList);
+        });
+        return () => unsubscribe();
+
+    }, []);
     return (
-       <ActorsContext.Provider value={actors}>
-          {children} 
-       </ActorsContext.Provider>
+        <ActorsContext.Provider value={actors}>
+            {children}
+        </ActorsContext.Provider>
     );
 }
 

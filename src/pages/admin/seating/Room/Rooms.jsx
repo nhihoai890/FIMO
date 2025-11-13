@@ -1,38 +1,56 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import SearchAdmin from '../../../../components/admin/SearchAdmin';
 import ModalRoom from './ModalRoom';
 import TableRoom from './TableRoom';
-import { addDocument } from '../../../../services/firebaseService';
+import { RoomsContext } from '../../../../contexts/RoomProvider';
+import { useEffect } from 'react';
 
-const inner = {name: "", idCinemaLocation: "", rows: "" ,columns: "", list_chair:[]}
+const inner = { name: "", idCinemaLocation: "", rows: "", columns: "", listChair: [] }
 function Room(props) {
-      const [open, setOpen] = useState(false);
-      const [room, setRoom] = useState(inner);
+  const rooms = useContext(RoomsContext);
+  const [open, setOpen] = useState(false);
+  const [room, setRoom] = useState(inner);
+  const [error, setError] = useState(inner);
+  const [roomFilter, setRoomFilter] = useState([]);
 
-  const handleClickOpen = () => {
-    setRoom(inner);
-    setOpen(true);
-  };
+  useEffect(() => {
+    setRoomFilter(rooms)
+  }, [rooms])
+
+const handleClickOpen = () => {
+  setRoom(inner);
+  setError(inner);
+  setOpen(true);
+};
 
   const handleClose = () => {
     setOpen(false);
   };
- 
- 
 
-  const handleInputRoom = (e) => {
-    setRoom({...room, [e.target.name]: e.target.value})
-    
+  const handleEditRoom = (re) => {
+    setRoom(re);
+    setOpen(true);
   }
 
-    return (
-        <>
-        <SearchAdmin title="List Rooms" placeholder="Search Room...." handleClickOpen={handleClickOpen} />
-        <TableRoom />
-        <ModalRoom open={open} handleClose={handleClose} room={room} handleInputRoom={handleInputRoom}  />
-        </>
-        
-    );
+  const handleSearch = (query) => {
+    const filtered = rooms.filter(room => room.name.toLowerCase().includes(query.toLowerCase().trim()))
+    setRoomFilter(filtered);
+  }
+
+
+  const handleInputRoom = (e) => {
+    setRoom({ ...room, [e.target.name]: e.target.value })
+
+  }
+
+  return (
+    <>
+      <SearchAdmin title="List Rooms" placeholder="Search Room...." handleClickOpen={handleClickOpen} onSearch={handleSearch} />
+      <TableRoom handleEditRoom={handleEditRoom} rooms={roomFilter} />
+      <ModalRoom open={open} handleClose={handleClose} room={room} handleInputRoom={handleInputRoom} error={error} setError={setError} />
+    </>
+
+  );
 }
 
 export default Room;

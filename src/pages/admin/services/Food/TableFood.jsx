@@ -6,22 +6,21 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { CinemaLocationsContext } from '../../../../contexts/CinemaLocationProvider';
-import { CitiesContext } from '../../../../contexts/CitiesProvider';
-import { CinemaContext } from '../../../../contexts/CinemaProvider';
-import { getOjectById } from '../../../../utils/functionContants';
-import { FaPen, FaTrash } from 'react-icons/fa';
 import { Button } from '@mui/material';
+import { FaPen, FaTrash } from 'react-icons/fa';
+import { FoodsContext } from '../../../../contexts/FoodProvider';
+import { CinemaLocationsContext } from '../../../../contexts/CinemaLocationProvider';
+import { getOjectById } from '../../../../utils/functionContants';
 import ModalDeleted from '../../../../components/admin/ModalDeleted';
 import { deleteDocument } from '../../../../services/firebaseService';
 import PaginationTablePage from '../../../../components/admin/PaginationTablePage';
 import { styled } from '@mui/material/styles';
 
-// Styled cells & rows kiểu cyber minimal
+// ===== Styled components =====
 const CyberCell = styled(TableCell)(() => ({
-  border: 'none',
+  border: 'none', // bỏ viền
   '&.MuiTableCell-head': {
-    backgroundColor: '#111',
+    backgroundColor: '#111', // solid dark
     color: '#00ffff',
     fontWeight: 700,
     fontSize: 14,
@@ -37,7 +36,7 @@ const CyberCell = styled(TableCell)(() => ({
 }));
 
 const CyberRow = styled(TableRow)(() => ({
-  backgroundColor: '#1A1A1A',
+  backgroundColor: '#1A1A1A', // solid dark
   '&:nth-of-type(odd)': { backgroundColor: '#1F1F1F' },
   '&:hover': {
     background: 'rgba(0,255,255,0.08)',
@@ -48,12 +47,11 @@ const CyberRow = styled(TableRow)(() => ({
   '&:last-child td, &:last-child th': { border: 0 },
 }));
 
-function TableCinemaLocations({ handleEditLocation }) {
+function TableFood({ handleEditFood }) {
+  const foods = useContext(FoodsContext);
   const cinemaLocations = useContext(CinemaLocationsContext);
-  const city = useContext(CitiesContext);
-  const cinema = useContext(CinemaContext);
-  const [cinelcDele, setCineclcDele] = useState(null);
   const [open, setOpen] = useState(false);
+  const [foodDelete, setFoodDelete] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -64,76 +62,74 @@ function TableCinemaLocations({ handleEditLocation }) {
   };
 
   const handleClickOpen = (row) => {
+    setFoodDelete(row);
     setOpen(true);
-    setCineclcDele(row);
   };
 
   const handleClose = () => setOpen(false);
   const handleDeleted = async () => {
-    await deleteDocument("cinemaLocations", cinelcDele);
+    await deleteDocument("foods", foodDelete);
     handleClose();
   };
 
   return (
-    <div>
+    <>
       <TableContainer
         component={Paper}
         sx={{
           mt: 3,
           borderRadius: 3,
-          overflow: 'hidden',
           backgroundColor: '#111', // solid dark
-          boxShadow: '0 0 15px rgba(0,255,255,0.1)',
+          boxShadow: '0 0 10px rgba(0, 255, 255, 0.1)',
+          overflow: 'hidden',
         }}
       >
-        <Table sx={{ minWidth: 650 }} size="small">
+        <Table sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
               <CyberCell>#</CyberCell>
               <CyberCell>Image</CyberCell>
               <CyberCell>Name</CyberCell>
-              <CyberCell>Address</CyberCell>
-              <CyberCell>Phone</CyberCell>
-              <CyberCell>City</CyberCell>
+              <CyberCell>Price</CyberCell>
               <CyberCell>Cinema</CyberCell>
+              <CyberCell>Discount</CyberCell>
               <CyberCell align="center">Action</CyberCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {cinemaLocations.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((cinec, index) => (
-              <CyberRow key={cinec.id}>
+            {foods.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((f, index) => (
+              <CyberRow key={f.id}>
                 <CyberCell>{page * rowsPerPage + index + 1}</CyberCell>
                 <CyberCell>
                   <img
-                    src={cinec.imgUrl}
-                    alt={cinec.name}
+                    src={f.imgUrl}
+                    alt={f.name}
                     style={{
-                      width: 50,
-                      height: 50,
+                      width: 60,
+                      height: 60,
                       borderRadius: 8,
                       objectFit: 'cover',
-                      boxShadow: '0 0 8px rgba(0,255,255,0.2)',
+                      
                     }}
                   />
                 </CyberCell>
-                <CyberCell>{cinec.name}</CyberCell>
-                <CyberCell sx={{ color: '#ccccff' }}>{cinec.address}</CyberCell>
-                <CyberCell sx={{ color: '#ccccff' }}>{cinec.phone}</CyberCell>
-                <CyberCell sx={{ color: '#b388ff' }}>{getOjectById(city, cinec.idCity)?.name}</CyberCell>
-                <CyberCell sx={{ color: '#b388ff' }}>{getOjectById(cinema, cinec.idCinema)?.name}</CyberCell>
+                <CyberCell>{f.name}</CyberCell>
+                <CyberCell sx={{ color: '#0ff' }}>{f.price}</CyberCell>
+                <CyberCell sx={{ color: '#0ff' }}>{getOjectById(cinemaLocations, f.idCinemaLocation)?.name}</CyberCell>
+                <CyberCell sx={{ color: '#f39c12' }}>{f.discount} %</CyberCell>
                 <CyberCell align="center">
                   <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
                     <Button
                       variant="contained"
                       size="small"
-                      onClick={() => handleEditLocation(cinec)}
+                      onClick={() => handleEditFood(f)}
                       sx={{
                         minWidth: 50,
                         borderRadius: 1,
-                        background: 'linear-gradient(90deg, #00e5ff, #7c4dff)',
+                        background: 'linear-gradient(90deg, #667eea, #764ba2)',
                         '&:hover': {
-                          background: 'linear-gradient(90deg, #7c4dff, #00e5ff)',
+                          background: 'linear-gradient(90deg, #5a67d8, #6b46c1)',
                           transform: 'scale(1.05)',
                         },
                         transition: 'all 0.25s ease-in-out',
@@ -141,16 +137,17 @@ function TableCinemaLocations({ handleEditLocation }) {
                     >
                       <FaPen />
                     </Button>
+
                     <Button
                       variant="contained"
                       size="small"
-                      onClick={() => handleClickOpen(cinec)}
+                      onClick={() => handleClickOpen(f)}
                       sx={{
                         minWidth: 50,
                         borderRadius: 1,
-                        background: 'linear-gradient(90deg, #ff4081, #d500f9)',
+                        background: 'linear-gradient(90deg, #ff416c, #ff4b2b)',
                         '&:hover': {
-                          background: 'linear-gradient(90deg, #d500f9, #ff4081)',
+                          background: 'linear-gradient(90deg, #ff4b2b, #ff416c)',
                           transform: 'scale(1.05)',
                         },
                         transition: 'all 0.25s ease-in-out',
@@ -164,9 +161,8 @@ function TableCinemaLocations({ handleEditLocation }) {
             ))}
           </TableBody>
         </Table>
-
         <PaginationTablePage
-          data={cinemaLocations}
+          data={foods}
           page={page}
           handleChangePage={handleChangePage}
           rowsPerPage={rowsPerPage}
@@ -174,9 +170,13 @@ function TableCinemaLocations({ handleEditLocation }) {
         />
       </TableContainer>
 
-      <ModalDeleted open={open} handleClose={handleClose} handleDeleted={handleDeleted} />
-    </div>
+      <ModalDeleted
+        open={open}
+        handleClose={handleClose}
+        handleDeleted={handleDeleted}
+      />
+    </>
   );
 }
 
-export default TableCinemaLocations;
+export default TableFood;

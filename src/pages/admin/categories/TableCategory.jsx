@@ -95,7 +95,7 @@ function TableCategory({ handleEdit }) {
                                 <TableCell sx={{ color: "#fff" }}>{page * rowsPerPage + index + 1}</TableCell>
                                 <TableCell sx={{ color: "#fff" }}>{cat.name}</TableCell>
                                 <TableCell sx={{ color: "#bbb" }}>{cat.description}</TableCell>
-                                <TableCell align="center">
+                                <TableCell align="center" sx={{ whiteSpace : "nowrap"}}>
                                     <Button variant="contained" onClick={() => handleEdit(cat)} size="small" color="primary" sx={{
                                         mr: 1,
                                         background:

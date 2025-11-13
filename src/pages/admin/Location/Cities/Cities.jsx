@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import SearchAdmin from '../../../../components/admin/SearchAdmin';
 import TableCities from './TableCities';
 import ModalCities from './ModalCities';
+import logo from "../../../../assets/logo.png"
 import { addDocument, updateDocument } from '../../../../services/firebaseService';
 
-const inner = { name: "", description: "", imgUrl: "" }
+const inner = { name: "", description: "", imgUrl: logo }
 function Cities(props) {
     const [open, setOpen] = useState(false);
     const [city, setCity] = useState(inner);

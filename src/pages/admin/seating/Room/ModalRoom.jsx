@@ -4,13 +4,12 @@ import {
     Slide, Autocomplete, Grid, Paper, TextField, Box
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { PiBrowserFill } from "react-icons/pi";
 import seat from "../../../../assets/seat.png";
 import { CinemaLocationsContext } from '../../../../contexts/CinemaLocationProvider';
 import { TypeChairsContext } from '../../../../contexts/TypeChairProvider';
 import ModalChooseTypeChair from './ModalChooseTypeChair';
 import { getOjectById } from '../../../../utils/functionContants';
-import { addDocument } from '../../../../services/firebaseService';
+import { addDocument, updateDocument } from '../../../../services/firebaseService';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -29,42 +28,76 @@ const Item = styled(Paper)(({ theme }) => ({
     },
 }));
 
-function ModalRoom({ open, handleClose, room, handleInputRoom }) {
+function ModalRoom({ open, handleClose, room, handleInputRoom, error, setError }) {
     const cinemaLocations = useContext(CinemaLocationsContext);
     const typeChairs = useContext(TypeChairsContext);
     const [grid, setGrid] = useState([]);
     const [chooseType, setChooseType] = useState(false);
     const [selectSeat, setSelectSeat] = useState(null);
     useEffect(() => {
-        const newGrid = Array.from({ length: room.rows }, (_, rowIndex) =>
-            Array.from({ length: room.columns }, (_, colIndex) =>
-                grid[rowIndex]?.[colIndex] || { col:'', row: "", idChair: "" }
-            )
+        if (!room.rows || !room.columns) {
+            setGrid([]);
+            return;
+        }
+        const newGrid = Array.from({ length: Number(room.rows) }, (_, rowIndex) =>
+            Array.from({ length: Number(room.columns) }, (_, colIndex) => {
+                const found = room.listChair?.find(
+                    (chair) => chair.row === rowIndex && chair.col === colIndex
+                );
+                return found || { row: rowIndex, col: colIndex, idChair: "" };
+            })
         );
         setGrid(newGrid);
     }, [room.rows, room.columns]);
 
+    useEffect(() => {
+        if (open && !room.id) {
+            setGrid([]);
+            setError({});
+        }
+    }, [open]);
     const handleClickSeat = (row, col, idChair) => {
-        setSelectSeat({ row, col ,idChair });
+        setSelectSeat({ row, col, idChair });
         setChooseType(true);
     }
 
-     const addRoom = async () => {
-      const listChair = grid.flat().filter(e => e.idChair !== "");
-       room.listChair = listChair ;
-       console.log(room);
-      await addDocument("rooms", room);
-      handleClose();
-  }
+    const addRoom = async () => {
+        if (validation()) {
+            return;
+        }
+        const listChair = grid.flat().filter(e => e.idChair !== "");
+        room.listChair = listChair;
+        if (room.id) {
+            await updateDocument("rooms", room);
+        } else {
+            await addDocument("rooms", room);
+        }
+
+        handleClose();
+    }
+
+    const validation = () => {
+        const newError = {};
+        newError.name = room.name ? "" : "Please enter Room"
+        newError.idCinemaLocation = room.idCinemaLocation ? "" : "Please choose Cinema";
+        newError.rows = room.rows ? "" : "Please Enter Rows"
+        newError.columns = room.columns ? "" : "Please Enter Columns";
+        setError(newError);
+        return Object.values(newError).some(e => e !== "")
+
+    }
+
+
+
 
     const handleSelectType = (type) => {
         const { row, col, idChair } = selectSeat;
         const updateGrid = [...grid];
-   
+
         updateGrid[row][col] = {
             row: row,
             col: col,
-            idChair: idChair == type.id ? "" : type.id  || seat,
+            idChair: idChair == type.id ? "" : type.id || seat,
         };
         setGrid(updateGrid);
         setChooseType(false);
@@ -100,7 +133,7 @@ function ModalRoom({ open, handleClose, room, handleInputRoom }) {
                     textShadow: '0 0 10px rgba(0,255,255,0.5)',
                 }}
             >
-                💡 Add Room
+                {room.id ? "UPDATE ROOM" : "ADD ROOM"}
             </DialogTitle>
 
             <DialogContent sx={{ mt: 2 }}>
@@ -112,6 +145,8 @@ function ModalRoom({ open, handleClose, room, handleInputRoom }) {
                         fullWidth
                         value={room.name}
                         variant="outlined"
+                        error={!!error.name}
+                        helperText={error.name}
                         onChange={handleInputRoom}
                         InputLabelProps={{ style: { color: '#00ffff' } }}
                         InputProps={{
@@ -136,6 +171,8 @@ function ModalRoom({ open, handleClose, room, handleInputRoom }) {
                                 {...params}
                                 label="Select Cinema"
                                 margin="dense"
+                                error={!!error.idCinemaLocation}
+                                helperText={error.idCinemaLocation}
                                 InputLabelProps={{ style: { color: '#00ffff' } }}
                                 InputProps={{
                                     ...params.InputProps,
@@ -156,6 +193,8 @@ function ModalRoom({ open, handleClose, room, handleInputRoom }) {
                             label="Rows"
                             onChange={handleInputRoom}
                             name="rows"
+                            error={!!error.rows}
+                            helperText={error.rows}
                             value={room.rows}
                             type="number"
                             variant="outlined"
@@ -173,6 +212,8 @@ function ModalRoom({ open, handleClose, room, handleInputRoom }) {
                             label="Columns"
                             value={room.columns}
                             onChange={handleInputRoom}
+                            error={!!error.columns}
+                            helperText={error.columns}
                             name="columns"
                             type="number"
                             variant="outlined"
@@ -202,18 +243,18 @@ function ModalRoom({ open, handleClose, room, handleInputRoom }) {
                                     const rowIndex = Math.floor(index / room.columns);
                                     const colIndex = index % room.columns;
                                     const key = `${rowIndex}-${colIndex}`;
-                                    
+
                                     return (
                                         <Box key={key} sx={{ position: 'relative' }}>
                                             <img
-                                                src={getOjectById(typeChairs,e.idChair)?.imgUrl || seat}
+                                                src={getOjectById(typeChairs, e.idChair)?.imgUrl || seat}
                                                 alt="#"
                                                 className="cursor-pointer"
                                                 width={40}
                                                 height={40}
                                                 onClick={() => handleClickSeat(rowIndex, colIndex, e.idChair)}
                                                 style={{
-                                                    filter: getOjectById(typeChairs,e.idChair)
+                                                    filter: getOjectById(typeChairs, e.idChair)
                                                         ? 'drop-shadow(0 0 8px #ff00ff)'
                                                         : 'drop-shadow(0 0 8px #00ffff)',
                                                     transition: '0.2s',
@@ -249,7 +290,7 @@ function ModalRoom({ open, handleClose, room, handleInputRoom }) {
                         },
                     }}
                 >
-                    Add
+                    {room.id ? "Update" : "Add"}
                 </Button>
             </DialogActions>
             <ModalChooseTypeChair selectSeat={selectSeat} open={chooseType} handleClose={() => setChooseType(false)} onSelectType={handleSelectType} />
