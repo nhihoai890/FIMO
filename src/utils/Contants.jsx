@@ -5,70 +5,70 @@ import { IoLocationSharp } from "react-icons/io5";
 import { MdDashboard, MdEventSeat, MdGroup } from "react-icons/md";
 
 export const LISTMENU = [
-     {
-    name: "Dashboard",
-    path: "/",
-    icon: <MdDashboard />,
-    items: [] 
-  },
-  {
-    name: "Categories",
-    path: "/categories",
-    icon: <BiSolidCategoryAlt />,
-    items: []
-  },
+   {
+      name: "Dashboard",
+      path: "/",
+      icon: <MdDashboard />,
+      items: []
+   },
+   {
+      name: "Categories",
+      path: "/categories",
+      icon: <BiSolidCategoryAlt />,
+      items: []
+   },
 
-    {
-      
-       title : "CinemaManager",
-       icon : <CiImageOn />,
-       items : [
+   {
+
+      title: "CinemaManager",
+      icon: <CiImageOn />,
+      items: [
          {
-            name : "Movie",
+            name: "Movie",
             path: "/movie"
          },
-          {
-            name : "MovieScreening",
+         {
+            name: "MovieScreening",
             path: "/moviescreening"
          },
-       ]
-    },
-    {
-       title : "Location",
-       icon : <IoLocationSharp />,
-       items : [
+      ]
+   },
+   {
+      title: "Location",
+      icon: <IoLocationSharp />,
+      items: [
          {
-            name : "Cities",
+            name: "Cities",
             path: "/cities"
          },
-          {
-            name : "CinemaLocations",
+         {
+            name: "CinemaLocations",
             path: "/cinemalocations"
          },
          {
-            name : "Cinema",
+            name: "Cinema",
             path: "/cinema"
          }
-       ]
-    },
-    {
-       title : "Cast and Crew",
-       icon : <MdGroup />,
-       items : [
+      ]
+   },
+   {
+      title: "Cast and Crew",
+      icon: <MdGroup />,
+      items: [
          {
-            name : "Actors",
+            name: "Actors",
             path: "/actors"
          },
-          {
-            name : "Directors",
+         {
+            name: "Directors",
             path: "/directors"
          },
-       ]
-    },
-      {
-       title : "Seating",
-       icon : <MdEventSeat />,
-       items : [
+      ]
+   },
+   {
+      title: "Seating",
+      icon: <MdEventSeat />,
+      items: [
          {
             name: "TypeChairs",
             path: "/typechairs"
@@ -77,22 +77,22 @@ export const LISTMENU = [
             name: "Room",
             path: "/rooms"
          }
-        
-       ]
-    },
-      {
-       title : "Services",
-       icon : <FaBowlFood />,
-       items : [
-           {
-            name : "Foods",
+
+      ]
+   },
+   {
+      title: "Services",
+      icon: <FaBowlFood />,
+      items: [
+         {
+            name: "Foods",
             path: "/foods"
          },
-          {
-            name : "Booking",
+         {
+            name: "Booking",
             path: "/booking"
          },
-       ]
-    },
-    
+      ]
+   },
+
 ]

@@ -8,10 +8,10 @@ function HomeAdmin(props) {
         <div className='min-md:flex h-screen'>
             <MenuAdmin />
             <div className='flex-1'>
-                <HeaderAdmin /> 
-                 <div className='p-5'>
+                <HeaderAdmin />
+                <div className='p-5'>
                     <AdminRouters />
-                 </div>
+                </div>
             </div>
         </div>
     );

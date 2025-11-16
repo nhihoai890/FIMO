@@ -2,8 +2,9 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import HomeAdmin from './pages/admin/home_admin/HomeAdmin'
-import BackgroundStars from './components/background/BackgroundStars'
+import Home from './pages/client/home/Home'
+// import HomeAdmin from './pages/admin/home_admin/HomeAdmin'
+// import BackgroundStars from './components/background/BackgroundStars'
 
 
 function App() {
@@ -11,16 +12,19 @@ function App() {
 
   return (
     <>
-      <div style={{ position: "relative", minHeight: "100vh" }}>
+      {/* <div style={{ position: "relative", minHeight: "100vh" }}>
         <BackgroundStars />
 
-       
+
         <div style={{ position: "relative", zIndex: 1 }}>
           <HomeAdmin />
         </div>
-      </div>
+      </div> */}
+       <div className=' relative z-1'>
+           <Home />
+       </div>
     </>
   )
 }
 
-export default App
+export default App;

@@ -11,7 +11,7 @@ import { CitiesContext } from '../../../../contexts/CitiesProvider';
 import { CinemaContext } from '../../../../contexts/CinemaProvider';
 import { getOjectById } from '../../../../utils/functionContants';
 import { FaPen, FaTrash } from 'react-icons/fa';
-import { Button } from '@mui/material';
+import { Button, Tooltip } from '@mui/material';
 import ModalDeleted from '../../../../components/admin/ModalDeleted';
 import { deleteDocument } from '../../../../services/firebaseService';
 import PaginationTablePage from '../../../../components/admin/PaginationTablePage';
@@ -86,7 +86,7 @@ function TableCinemaLocations({ handleEditLocation }) {
           boxShadow: '0 0 15px rgba(0,255,255,0.1)',
         }}
       >
-        <Table sx={{ minWidth: 650 }} size="small">
+        <Table >
           <TableHead>
             <TableRow>
               <CyberCell>#</CyberCell>
@@ -118,8 +118,21 @@ function TableCinemaLocations({ handleEditLocation }) {
                   />
                 </CyberCell>
                 <CyberCell>{cinec.name}</CyberCell>
-                <CyberCell sx={{ color: '#ccccff' }}>{cinec.address}</CyberCell>
-                <CyberCell sx={{ color: '#ccccff' }}>{cinec.phone}</CyberCell>
+                <Tooltip title={cinec.address} arrow>
+                  <CyberCell
+                    sx={{
+                      color: '#ccccff',
+                      maxWidth: 180,            
+                      whiteSpace: 'nowrap',     
+                      overflow: 'hidden',       
+                      textOverflow: 'ellipsis', 
+                    }}
+                  >
+                    {cinec.address}
+                  </CyberCell>
+                </Tooltip>
+
+                < CyberCell sx={{ color: '#ccccff' }}>{cinec.phone}</CyberCell>
                 <CyberCell sx={{ color: '#b388ff' }}>{getOjectById(city, cinec.idCity)?.name}</CyberCell>
                 <CyberCell sx={{ color: '#b388ff' }}>{getOjectById(cinema, cinec.idCinema)?.name}</CyberCell>
                 <CyberCell align="center">

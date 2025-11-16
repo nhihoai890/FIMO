@@ -24,8 +24,8 @@ function HeaderAdmin(props) {
       <div className="flex items-center justify-between px-8 py-4 text-white">
         {/* Bên trái */}
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-extrabold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent animate-pulse">
-            Good Morning 👋
+          <h1 className="text-2xl font-extrabold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent animate-glow">
+            Welcome
           </h1>
         </div>
 
@@ -60,11 +60,9 @@ function HeaderAdmin(props) {
               >
                 <ul className="flex flex-col text-gray-300 text-sm">
                   <li className="px-4 py-2 hover:bg-cyan-900/30 hover:text-white cursor-pointer transition">
-                    Đăng nhập
+                    Profile
                   </li>
-                  <li className="px-4 py-2 hover:bg-cyan-900/30 hover:text-white cursor-pointer transition">
-                    Đăng ký
-                  </li>
+
                   <li className="px-4 py-2 hover:bg-cyan-900/30 hover:text-white cursor-pointer transition">
                     Đăng xuất
                   </li>
@@ -91,6 +89,22 @@ function HeaderAdmin(props) {
             animation: slideDown 0.25s ease-out;
           }
         `}
+
+        {`
+@keyframes glow {
+  0%, 100% {
+    text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #a0f;
+    opacity: 1;
+  }
+  50% {
+    text-shadow: 0 0 20px #a0f, 0 0 40px #0ff, 0 0 60px #0ff;
+    opacity: 0.8;
+  }
+}
+.animate-glow {
+  animation: glow 2s infinite ease-in-out;
+}
+`}
       </style>
     </header>
   );

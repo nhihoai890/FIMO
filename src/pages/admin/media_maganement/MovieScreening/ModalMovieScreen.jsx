@@ -13,8 +13,11 @@ import { IoMdAddCircleOutline } from 'react-icons/io';
 import { PiFilmSlateBold } from "react-icons/pi";
 import logo from "../../../../assets/logo.png"
 import { FaTrashAlt } from 'react-icons/fa';
-import { filterById } from '../../../../utils/functionContants';
+import { filterById, getOjectById } from '../../../../utils/functionContants';
 import ModalChooseMovie from './ModalChooseMovie';
+import { MoviesContext } from '../../../../contexts/MovieProvider';
+import ShowRoom from '../../seating/Room/ShowRoom';
+import { RoomsContext } from '../../../../contexts/RoomProvider';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -22,8 +25,10 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 
 
-function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovieScreen }) {
+function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovieScreen, addMovieScreen }) {
     const cities = useContext(CitiesContext);
+    const movies = useContext(MoviesContext);
+    const rooms = useContext(RoomsContext);
     const cinemaLocations = useContext(CinemaLocationsContext);
     const [time, setTime] = useState("");
     const [openChoose, setOpenChoose] = useState(false);
@@ -93,7 +98,7 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                             '&:hover fieldset': { borderColor: '#ff00ff' },
                                             '&.Mui-focused fieldset': { borderColor: '#00ffff' },
                                             '& input': {
-                                                appearance: 'none', // ✨ tắt UI gốc
+                                                appearance: 'none', //  tắt UI gốc
                                                 color: '#00ffff',
                                                 backgroundColor: '#1a1a2b',
                                                 caretColor: '#ff00ff',
@@ -273,7 +278,7 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                             '&:hover fieldset': { borderColor: '#ff00ff' },
                                             '&.Mui-focused fieldset': { borderColor: '#00ffff' },
                                             '& input': {
-                                                appearance: 'none', // ✨ tắt UI gốc
+                                                appearance: 'none', //  tắt UI gốc
                                                 color: '#00ffff',
                                                 backgroundColor: '#1a1a2b',
                                                 caretColor: '#ff00ff',
@@ -331,7 +336,7 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                 </Box>
                                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                                     <img
-                                        src={movieScreen.imgUrl || logo}
+                                        src={getOjectById(movies, movieScreen.idMovie)?.imgUrl || logo}
                                         alt=""
                                         style={{
                                             width: 140,
@@ -344,9 +349,41 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                     />
                                 </Box>
                             </Box>
-                            <Box>
+                            <div className="flex gap-4 flex-wrap">
+                                {filterById(rooms, movieScreen.idCinemaLocation, "idCinemaLocation").map(m => (
+                                    <div className="flex flex-col items-center">
+                                        <div
+                                            className="
+                    w-[160px] h-[120px] 
+                    overflow-hidden flex items-center justify-center
+                    rounded-xl
+                    bg-[#0f0f1a]
+                    border border-cyan-500/40
+                    shadow-[0_0_12px_rgba(0,255,255,0.25)]
+                    hover:shadow-[0_0_18px_rgba(255,0,255,0.4)]
+                    transition-all duration-300
+                "
+                                        >
+                                            <ShowRoom data={m} />
+                                        </div>
 
-                            </Box>
+                                      
+                                        <div
+                                            className="
+                    w-full mt-2 py-1 
+                    text-center text-white font-medium text-sm
+                    rounded-md
+                    bg-gradient-to-r from-cyan-500 to-blue-600
+                    shadow-[0_0_8px_rgba(0,255,255,0.4)]
+                "
+                                        >
+                                            {m.name}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+
                         </Box>
                     </DialogContentText>
                 </DialogContent>
@@ -358,7 +395,7 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                         '&:hover': {
                             background: 'linear-gradient(135deg, #ff00ff, #00ffff)',
                         }
-                    }} onClick={handleClose}>Add</Button>
+                    }} onClick={addMovieScreen}>Add</Button>
                 </DialogActions>
             </Dialog>
             <ModalChooseMovie openChoose={openChoose} handleCloseChoose={handleCloseChoose} setMovieScreen={setMovieScreen} movieScreen={movieScreen} />

@@ -18,15 +18,13 @@ function ModalChooseMovie({ openChoose, handleCloseChoose, setMovieScreen, movie
             if (prev.idMovie === movie.id) {
                 return {
                     ...prev,
-                    idMovie: null,
-                    imgUrl: null,
+                    idMovie: null
                 };
             }
 
             return {
                 ...prev,
-                idMovie: movie.id,
-                imgUrl: movie.imgUrl
+                idMovie: movie.id
             };
         });
 
