@@ -139,6 +139,8 @@ function ModalMovie({ loading, open, handleClose, handleAddMovie, handleInputMov
               />
             ))}
 
+           
+
             <Autocomplete
               options={director}
               getOptionLabel={(option) => option?.name || ""}
@@ -165,6 +167,9 @@ function ModalMovie({ loading, open, handleClose, handleAddMovie, handleInputMov
               )}
             />
           </Box>
+
+
+
 
           {/* RIGHT FORM */}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

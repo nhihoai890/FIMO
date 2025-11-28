@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { useRef } from 'react';
 import { FaUserCircle } from 'react-icons/fa';
 import { FiMail, FiSearch } from 'react-icons/fi';
 import { IoNotificationsOutline } from 'react-icons/io5';
+import { AuthContext } from '../../contexts/AuthsProvider';
+import { useNavigate } from 'react-router-dom';
 
 
 function HeaderAdmin(props) {
   const [openDropDown, setOpenDropDown] = useState(false);
   const dropdown = useRef(null);
+  const { logout } = useContext(AuthContext)
+  const navigate = useNavigate();
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdown.current && !dropdown.current.contains(event.target)) {
@@ -63,7 +68,10 @@ function HeaderAdmin(props) {
                     Profile
                   </li>
 
-                  <li className="px-4 py-2 hover:bg-cyan-900/30 hover:text-white cursor-pointer transition">
+                  <li onClick={() => {
+                    logout();
+                    navigate("/main")
+                  }} className="px-4 py-2 hover:bg-cyan-900/30 hover:text-white cursor-pointer transition">
                     Đăng xuất
                   </li>
                 </ul>

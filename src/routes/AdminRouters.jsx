@@ -69,7 +69,7 @@ function AdminRouters(props) {
             element: <TypeChairs />
         }
 
-    ]
+    ]   
     return (
         <div>
             <Routes>

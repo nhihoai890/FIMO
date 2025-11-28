@@ -55,24 +55,21 @@ function TableMovie({ handleEditMovie }) {
       >
         <Table >
           {/* Header */}
-          <TableHead>
-            <TableRow sx={{ background: 'linear-gradient(90deg, #1f1f3a, #292952)' }}>
-              {['#', 'Image', 'Name', 'Director', 'Age', 'Duration', 'Actors', 'Categories', 'Action'].map((col, i) => (
-                <TableCell
-                  key={i}
-                  sx={{
-                    color: '#00eaff',
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    textTransform: 'uppercase',
-                    borderBottom: '2px solid rgba(0,238,255,0.2)',
-                  }}
-                >
-                  {col}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
+          {['#', 'Image', 'Name', 'Director', 'Age', 'Duration', 'Actors', 'Categories', 'Action'].map((col, i) => (
+            <TableCell
+              key={i}
+              sx={{
+                color: '#00eaff',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                textTransform: 'uppercase',
+                borderBottom: '2px solid rgba(0,238,255,0.2)',
+              }}
+            >
+              {col}
+            </TableCell>
+          ))}
+
 
           {/* Body */}
           <TableBody>
@@ -122,6 +119,9 @@ function TableMovie({ handleEditMovie }) {
                     <PiFilmReelFill size={20} color="#00ffff" style={{ filter: 'drop-shadow(0 0 4px #00ffff)' }} />
                   </Tooltip>
                 </TableCell>
+
+             
+
 
                 <TableCell>
                   <Box sx={{ display: 'flex', gap: 1 }}>

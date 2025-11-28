@@ -1,7 +1,7 @@
 export const MENUCINEMA = [
     {
         name: "Trang Chủ",
-        path: "/",
+        path: "/main",
         items : []
     },
 
@@ -24,7 +24,8 @@ export const MENUCINEMA = [
        path: "/schedule"
     },
     {
-        name: "Rạp"
+        name: "Rạp",
+        path: "/cine"
     },
     {
         name:"Cộng đồng",

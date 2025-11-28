@@ -31,7 +31,7 @@ function ModalDeleted({ open, handleClose, handleDeleted }) {
                 {/* Header */}
                 <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
                     <Box
-                      
+
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.3 }}

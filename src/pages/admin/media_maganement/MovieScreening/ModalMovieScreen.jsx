@@ -367,7 +367,7 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                             <ShowRoom data={m} />
                                         </div>
 
-                                      
+
                                         <div
                                             className="
                     w-full mt-2 py-1 
