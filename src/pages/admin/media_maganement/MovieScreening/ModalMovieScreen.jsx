@@ -25,13 +25,14 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 
 
-function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovieScreen, addMovieScreen }) {
+function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovieScreen, addMovieScreen, error }) {
     const cities = useContext(CitiesContext);
     const movies = useContext(MoviesContext);
     const rooms = useContext(RoomsContext);
     const cinemaLocations = useContext(CinemaLocationsContext);
     const [time, setTime] = useState("");
     const [openChoose, setOpenChoose] = useState(false);
+
     const handleChoose = () => {
         setOpenChoose(true);
     }
@@ -42,13 +43,24 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
 
     const handleTime = () => {
         if (!time) return;
-        setMovieScreen(prev => ({ ...prev, list_showtime: [...prev.list_showtime, time] }));
+        setMovieScreen(prev => {
+            if (prev.list_showtime.includes(time)) return prev;
+
+            return {
+                ...prev,
+                list_showtime: [...prev.list_showtime, time]
+            };
+        });
         setTime("");
     }
 
     const removeTime = (timeRemove) => {
         setMovieScreen(prev => ({ ...prev, list_showtime: prev.list_showtime.filter(t => t !== timeRemove) }))
 
+    }
+
+    const chooseRoom = (cr) => {
+        setMovieScreen(prev => ({ ...prev, idRoom: cr == prev.idRoom ? "" : cr }))
     }
     return (
         <div>
@@ -74,7 +86,7 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                 }}
 
             >
-                <DialogTitle sx={{ color: '#00ffff', fontWeight: 600 }}>Add Movie Screen</DialogTitle>
+                <DialogTitle sx={{ color: '#00ffff', fontWeight: 600 }}>{movieScreen.id ? "Update Movie Screen" : "Add Movie Screen"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText >
                         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 4, mt: 2 }}>
@@ -83,11 +95,14 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                     label="Release Date"
                                     type="date"
                                     name="release_date"
+                                    value={movieScreen.release_date}
                                     fullWidth
                                     InputLabelProps={{
                                         shrink: true,
                                         style: { color: '#7fffff' },
                                     }}
+                                    error={!!error.release_date}
+                                    helperText={error.release_date}
                                     onChange={handleInput}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
@@ -148,6 +163,8 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                         <TextField
                                             {...params}
                                             label="Select City"
+                                            error={!!error.idCity}
+                                            helperText={error.idCity}
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
                                                     borderRadius: 2,
@@ -177,8 +194,11 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                     label="Ratio"
                                     type="number"
                                     name="ratio"
+                                    value={movieScreen.ratio}
                                     fullWidth
                                     onChange={handleInput}
+                                    error={!!error.ratio}
+                                    helperText={error.ratio}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             borderRadius: 2,
@@ -227,6 +247,8 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                         <TextField
                                             {...params}
                                             label="Select Cinema"
+                                            error={!!error.idCinemaLocation}
+                                            helperText={error.idCinemaLocation}
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
                                                     borderRadius: 2,
@@ -254,9 +276,21 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                     label="Time"
                                     type="time"
                                     fullWidth
-                                    InputLabelProps={{ shrink: true }}
+                                    value={time}
                                     onChange={(e) => setTime(e.target.value)}
+                                    error={!!error.list_showtime && movieScreen.list_showtime.length === 0}
+                                    helperText={movieScreen.list_showtime.length === 0 ? error.list_showtime : ""}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                        sx: {
+                                            color: '#00ffff',             
+                                            '&.Mui-focused': {
+                                                color: '#ff00ff',           
+                                            },
+                                        },
+                                    }}
                                     InputProps={{
+
                                         endAdornment: (
                                             <InputAdornment onClick={handleTime} position="end">
                                                 <IconButton sx={{
@@ -268,6 +302,8 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                                 </IconButton>
                                             </InputAdornment>
                                         ),
+
+
                                     }}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
@@ -278,7 +314,7 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                             '&:hover fieldset': { borderColor: '#ff00ff' },
                                             '&.Mui-focused fieldset': { borderColor: '#00ffff' },
                                             '& input': {
-                                                appearance: 'none', //  tắt UI gốc
+                                                appearance: 'none',
                                                 color: '#00ffff',
                                                 backgroundColor: '#1a1a2b',
                                                 caretColor: '#ff00ff',
@@ -350,38 +386,47 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                                 </Box>
                             </Box>
                             <div className="flex gap-4 flex-wrap">
-                                {filterById(rooms, movieScreen.idCinemaLocation, "idCinemaLocation").map(m => (
-                                    <div className="flex flex-col items-center">
-                                        <div
-                                            className="
-                    w-[160px] h-[120px] 
-                    overflow-hidden flex items-center justify-center
-                    rounded-xl
-                    bg-[#0f0f1a]
-                    border border-cyan-500/40
-                    shadow-[0_0_12px_rgba(0,255,255,0.25)]
-                    hover:shadow-[0_0_18px_rgba(255,0,255,0.4)]
-                    transition-all duration-300
-                "
-                                        >
-                                            <ShowRoom data={m} />
-                                        </div>
+                                {filterById(rooms, movieScreen.idCinemaLocation, "idCinemaLocation").map(room => {
+                                    const isSelected = room.id === movieScreen.idRoom;
 
-
+                                    return (
                                         <div
-                                            className="
-                    w-full mt-2 py-1 
-                    text-center text-white font-medium text-sm
-                    rounded-md
-                    bg-gradient-to-r from-cyan-500 to-blue-600
-                    shadow-[0_0_8px_rgba(0,255,255,0.4)]
-                "
+                                            key={room.id}
+                                            className={`
+                    flex flex-col items-center cursor-pointer transition-all
+                    ${isSelected ? "scale-105" : "scale-100"}
+                `}
+                                            onClick={() => chooseRoom(room.id)}
                                         >
-                                            {m.name}
+                                            <div
+                                                className={`
+                        w-[160px] h-[120px] rounded-xl flex items-center justify-center
+                        overflow-hidden transition-all
+                        ${isSelected
+                                                        ? "border-2 border-fuchsia-400 shadow-[0_0_20px_rgba(255,0,255,0.7)]"
+                                                        : "border border-cyan-300 shadow-[0_0_12px_rgba(0,255,255,0.25)] hover:scale-105"
+                                                    }
+                    `}
+                                            >
+                                                <ShowRoom data={room} />
+                                            </div>
+
+                                            <div
+                                                className="
+                        w-full mt-2 py-1 rounded-md text-center
+                        text-white font-medium text-sm
+                        bg-gradient-to-r from-cyan-500 to-blue-600
+                        shadow-[0_0_8px_rgba(0,255,255,0.4)]
+                    "
+                                            >
+                                                {room.name}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
+
+
 
 
                         </Box>
@@ -395,7 +440,7 @@ function ModalMovieScreen({ handleClose, open, movieScreen, handleInput, setMovi
                         '&:hover': {
                             background: 'linear-gradient(135deg, #ff00ff, #00ffff)',
                         }
-                    }} onClick={addMovieScreen}>Add</Button>
+                    }} onClick={addMovieScreen}>{movieScreen.id ? "Update" : "Add"}</Button>
                 </DialogActions>
             </Dialog>
             <ModalChooseMovie openChoose={openChoose} handleCloseChoose={handleCloseChoose} setMovieScreen={setMovieScreen} movieScreen={movieScreen} />

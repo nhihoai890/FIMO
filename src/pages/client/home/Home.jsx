@@ -3,6 +3,7 @@ import Header from '../../../components/client/Header';
 import ClientRouters from '../../../routes/ClientRouters';
 import Footer from '../../../components/client/Footer';
 import Main from '../main/Main';
+import PageSearch from '../../../components/client/PageSearch';
 
 
 function Home(props) {

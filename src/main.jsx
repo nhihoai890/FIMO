@@ -17,6 +17,8 @@ import MovieScreeningProvider, { MovieScreeningContext } from "./contexts/MovieS
 import AccountProvider from "./contexts/AccountProvider";
 import { NotificationProvider } from "./contexts/NotificationProvider";
 import AuthsProvider from "./contexts/AuthsProvider";
+import BookingProvider from "./contexts/BookingProvider";
+import ItemFoodsProvider from "./contexts/ItemFoodsProvider";
 
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -35,7 +37,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                           <AccountProvider>
                             <NotificationProvider>
                               <AuthsProvider>
-                                <App />
+                                <BookingProvider>
+                                  <ItemFoodsProvider>
+                                    <App />
+                                  </ItemFoodsProvider>
+                                </BookingProvider>
                               </AuthsProvider>
                             </NotificationProvider>
                           </AccountProvider>

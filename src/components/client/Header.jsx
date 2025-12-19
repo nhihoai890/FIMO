@@ -116,7 +116,7 @@ export default function Header() {
               {isLogin ? (
                 <img
                   onClick={() => setUserOpen(!userOpen)}
-                  src="https://tranjstudio.com/storage/2024/08/capybara-vui-tuoi.webp"
+                  src= {isLogin?.imgUrl ? isLogin?.imgUrl : "https://tranjstudio.com/storage/2024/08/capybara-vui-tuoi.webp" }
                   className="w-11 h-11 rounded-full border-2 border-white shadow-lg cursor-pointer hover:scale-105 transition"
                 />
               ) : (

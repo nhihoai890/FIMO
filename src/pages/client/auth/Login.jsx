@@ -14,7 +14,7 @@ import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../../../config/firebaseConfig';
 import { addDocument } from '../../../services/firebaseService';
 import { useNavigate } from 'react-router-dom';
-
+import { ROLES } from "../../../utils/Contants";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -58,20 +58,21 @@ function Login({ open, handleClose, handleClickOpenRegister }) {
     const signInWithGoogle = async () => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
+            console.log(result);
+            
             const user = result.user;
             const existingCustomer = accounts.find(customer => customer.email === user.email);
             let loggedInCustomer;
-              console.log(existingCustomer);
-              
+            console.log(existingCustomer);
+
             if (!existingCustomer) {
-                      console.log("fsdfvdg");
                 const newCustomer = {
                     name: user.displayName,
                     imgUrl: user.photoURL,
                     role: ROLES.USER,
+                    email : user.email
                 };
-          
-                
+
                 await addDocument('accounts', newCustomer);
                 loggedInCustomer = newCustomer;
             } else {

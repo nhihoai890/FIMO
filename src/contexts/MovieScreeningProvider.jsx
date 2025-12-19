@@ -8,7 +8,7 @@ function MovieScreeningProvider({ children }) {
 
     useEffect(() => {
         const unsubscribe = fetchDocumentsRealtime("movieSceens", (movieScreenList) => {
-            console.log(movieScreenList);
+
 
             setMovieScreens(movieScreenList);
         })

@@ -1,13 +1,14 @@
 
-import React from "react";
+import React, { useContext } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import MovieCard from "./MovieCard";
+import { MoviesContext } from "../../../contexts/MovieProvider";
 
-function MovieSlider({ movieScreen, movies }) {
+function MovieSlider({ movieShow, status }) {
    return (
       <Swiper
          modules={[Navigation, Pagination, Autoplay]}
@@ -23,13 +24,13 @@ function MovieSlider({ movieScreen, movies }) {
          }}
          className="py-2"
       >
-         {movieScreen.map(ms => {
-            const movie = movies.find(mv => mv.id === ms.idMovie);
-            return movie ? (
-               <SwiperSlide key={ms.id || ms.idMovie}>
-                  <MovieCard movieScreen={ms} movie={movie} />
+         {movieShow.map(movie => {
+           
+            return (
+               <SwiperSlide key={ movie.id}>
+                  <MovieCard  movie={movie} status={status} />
                </SwiperSlide>
-            ) : null;
+            ) ;
          })}
       </Swiper>
    );

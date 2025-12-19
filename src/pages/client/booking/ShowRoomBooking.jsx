@@ -1,9 +1,9 @@
+import styled from '@emotion/styled';
 import { Box, Paper } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
-import { TypeChairsContext } from '../../../../contexts/TypeChairProvider';
-import { getOjectById } from '../../../../utils/functionContants';
-import seat from "../../../../assets/seat.png";
-import styled from '@emotion/styled';
+import { TypeChairsContext } from '../../../contexts/TypeChairProvider';
+import { getOjectById } from '../../../utils/functionContants';
+import seat from "../../../assets/seat.png"
 
 const Item = styled(Paper)(() => ({
     background: 'linear-gradient(145deg, rgba(20,20,30,1) 0%, rgba(10,10,20,1) 100%)',
@@ -17,9 +17,11 @@ const Item = styled(Paper)(() => ({
     },
 }));
 
-function ShowRoom({ data }) {
+function ShowRoomBooking({ data, handleBooking, showImgUrl }) {
     const [grid, setGrid] = useState([]);
     const typeChairs = useContext(TypeChairsContext);
+
+
     useEffect(() => {
         if (!data) return;
         const newGrid = Array.from({ length: Number(data.rows) }, (_, rowIndex) =>
@@ -35,7 +37,47 @@ function ShowRoom({ data }) {
         setGrid(newGrid);
     }, [data]);
 
-    
+    const generateSeatCodes = (data) => {
+        let rowCharCode = "A".charCodeAt(0);
+
+        // Group theo row
+        const rows = Object.values(
+            data.reduce((acc, item) => {
+                acc[item.row] ??= [];
+                acc[item.row].push(item);
+                return acc;
+            }, {})
+        );
+
+        const result = [];
+
+        for (const rowItems of rows) {
+            const chairs = rowItems.filter(i => i.idChair);
+
+            // Nếu row không có ghế → bỏ qua
+            if (chairs.length === 0) {
+                result.push(...rowItems);
+                continue;
+            }
+
+            let seatNumber = 1;
+            const rowChar = String.fromCharCode(rowCharCode++);
+
+            for (const item of rowItems) {
+                if (!item.idChair) {
+                    result.push(item);
+                } else {
+                    result.push({
+                        ...item,
+                        seatCode: `${rowChar}${seatNumber++}`
+                    });
+                }
+            }
+        }
+
+        return result;
+    }
+
     return (
         <Item sx={{ display: "flex" }}>
             <div
@@ -47,15 +89,15 @@ function ShowRoom({ data }) {
                     justifyContent: 'center',
                 }}
             >
-                {grid.flat().map((e, index) => {
+                {generateSeatCodes(grid.flat())?.map((e, index) => {
                     const rowIndex = Math.floor(index / data.columns);
                     const colIndex = index % data.columns;
                     const key = `${rowIndex}-${colIndex}`;
-
+                    console.log(e);
                     return (
-                        <Box  key={key} sx={{ position: 'relative' }} >
+                        <Box key={key} sx={{ position: 'relative' }} onClick={() => handleBooking(e)}>
                             <img
-                                src={getOjectById(typeChairs, e.idChair)?.imgUrl || seat}
+                                src={showImgUrl(e)}
                                 alt="#"
                                 className={`cursor-pointer ${getOjectById(typeChairs, e.idChair)?.imgUrl ? "" : "opacity-0"}`}
                                 width={40}
@@ -69,6 +111,7 @@ function ShowRoom({ data }) {
                                 onMouseOver={(e) => (e.currentTarget.style.filter = 'drop-shadow(0 0 12px #ff00ff) brightness(1.2)')}
                                 onMouseOut={(e) => (e.currentTarget.style.filter = 'drop-shadow(0 0 8px #00ffff)')}
                             />
+                            <div className='absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-black text-sm font-bold'>{e.seatCode}</div>
                         </Box>
                     );
                 })}
@@ -77,4 +120,4 @@ function ShowRoom({ data }) {
     );
 }
 
-export default ShowRoom;
+export default ShowRoomBooking;

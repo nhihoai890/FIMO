@@ -22,8 +22,9 @@ import { RoomsContext } from '../../../../contexts/RoomProvider';
 import { getOjectById } from '../../../../utils/functionContants';
 import ModalDeleted from '../../../../components/admin/ModalDeleted';
 import { deleteDocument } from '../../../../services/firebaseService';
+import PaginationTablePage from '../../../../components/admin/PaginationTablePage';
 
-function TableMovieScreening() {
+function TableMovieScreening({ handleEdit }) {
   const movieScreens = useContext(MovieScreeningContext);
   const movies = useContext(MoviesContext);
   const cities = useContext(CitiesContext);
@@ -31,6 +32,14 @@ function TableMovieScreening() {
   const rooms = useContext(RoomsContext);
   const [open, setOpen] = useState(false);
   const [moviescreenDelete, setMovieScreenDelete] = useState(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const handleChangePage = (event, newPage) => setPage(newPage);
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const handleClickOpen = (sc) => {
     setOpen(true);
@@ -41,7 +50,7 @@ function TableMovieScreening() {
     setOpen(false);
   }
   const handleDeleted = async () => {
-    await deleteDocument("movieSceens",moviescreenDelete);
+    await deleteDocument("movieSceens", moviescreenDelete);
     handleClose();
   }
 
@@ -89,10 +98,9 @@ function TableMovieScreening() {
           </TableHead>
 
           <TableBody>
-            {movieScreens.map((ms, index) => {
-              const roomsOfCinema = rooms.filter(
-                (r) => r.idCinemaLocation === ms.idCinemaLocation
-              );
+            {movieScreens.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((ms, index) => {
+            const roomSelected = getOjectById(rooms, ms.idRoom);
+
 
               return (
                 <TableRow
@@ -106,7 +114,7 @@ function TableMovieScreening() {
                     transition: '0.3s',
                   }}
                 >
-                  <TableCell sx={{ color: '#00ffff' }}>{index + 1}</TableCell>
+                  <TableCell sx={{ color: '#00ffff' }}>{page * rowsPerPage + index + 1}</TableCell>
 
                   {/* Movie Poster */}
                   <TableCell >
@@ -168,9 +176,9 @@ function TableMovieScreening() {
 
                   {/* Rooms */}
                   <TableCell >
-                    {roomsOfCinema.length > 0 ? (
+                    {roomSelected ? (
                       <Tooltip
-                        title={roomsOfCinema.map(r => r.name).join(' | ')}
+                        title={roomSelected.name}
                         arrow
                         placement="top"
                         componentsProps={{
@@ -208,6 +216,7 @@ function TableMovieScreening() {
                             boxShadow: '0 0 15px #00ffff',
                           },
                         }}
+                        onClick={() => handleEdit(ms)}
                       >
                         <FaPen />
                       </Button>
@@ -238,6 +247,13 @@ function TableMovieScreening() {
             })}
           </TableBody>
         </Table>
+        <PaginationTablePage
+          page={page}
+          handleChangePage={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          handleChangeRowsPerPage={handleChangeRowsPerPage}
+          data={movieScreens}
+        />
       </TableContainer>
       <ModalDeleted open={open} handleDeleted={handleDeleted} handleClose={handleClose} />
     </>

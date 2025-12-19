@@ -99,7 +99,6 @@ function ModalChooseMovie({ openChoose, handleCloseChoose, setMovieScreen, movie
                                     ? "0 0 15px 3px #00FFF7, 0 0 25px 5px rgba(0,255,255,0.3)"
                                     : "none",
                                 transform: movieScreen.idMovie === movie.id ? "translateY(-3px)" : "none",
-                                transition: "all 0.3s ease",
                                 "&:hover": {
                                     transform: "scale(1.05) translateY(-3px)",
                                     boxShadow: movieScreen.idMovie === movie.id

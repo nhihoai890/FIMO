@@ -45,10 +45,7 @@ function Movie(props) {
 
   const handleEditMovie = (mve) => {
     handleClickOpen();
-    setMovie({
-      ...mve,
-      status: mve.status?.toLowerCase() === "now_showing" ? "now_showing" : "upcoming"
-    });
+    setMovie(mve);
   };
 
   const handleClose = () => {
@@ -73,7 +70,6 @@ function Movie(props) {
     newError.ageLimit = movie.ageLimit ? "" : "Please Enter Age Limit"
     newError.urlTrailer = movie.urlTrailer ? "" : "Please Enter Url Trailer"
     newError.idDirector = movie.idDirector ? "" : "Please choose Director"
-    newError.status = movie.status ? "" : "Please choose status";
     setError(newError);
     return Object.values(newError).some(e => e !== "");
   }
