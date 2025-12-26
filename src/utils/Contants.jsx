@@ -102,3 +102,9 @@ export const ROLES = {
     MODERATOR: 'moderator', // Quản trị viên cấp trung (người kiểm duyệt)
     USER: 'user',          // Người dùng thông thường
 };
+
+export const initialOptions = {
+  "client-id": "AYqvtd5X5hNlRSHnWjYawjjB87lETr0CT7y533a5b9Si70PYmoRI9djY7_qOYSB1xCfR_a_NM8vtJSI6",
+  currency: "USD",
+  intent: "capture"
+};

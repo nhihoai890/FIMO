@@ -136,7 +136,7 @@ export default function Header() {
                     <Link className="flex items-center gap-3 px-5 py-3 hover:bg-pink-100 transition">
                       <FiUserCheck /> Profile
                     </Link>
-                    <Link className="flex items-center gap-3 px-5 py-3 hover:bg-pink-100 transition">
+                    <Link to="/history" className="flex items-center gap-3 px-5 py-3 hover:bg-pink-100 transition">
                       <FiClock /> Lịch sử đặt vé
                     </Link>
                     <button

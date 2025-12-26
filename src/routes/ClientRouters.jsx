@@ -12,6 +12,7 @@ import Details from '../pages/client/detail/Details';
 import Booking from '../pages/client/booking/Booking';
 import Order from '../pages/client/combo/Order';
 import Payment from '../pages/client/payment/Payment';
+import HistoryBooking from '../pages/client/booking/HistoryBooking';
 
 
 
@@ -66,9 +67,14 @@ function ClientRouters(props) {
             element: <Order />
         },
         {
-            path: "/payment",
+            path: "/payment/:id",
             element:<Payment />
-        }
+        },
+        {
+            path: "/history",
+            element:<HistoryBooking />
+        },
+        
 
     ]
     return (

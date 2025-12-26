@@ -65,7 +65,7 @@ function PageSearch() {
     };
 
     return (
-        <div className="w-full px-16 absolute z-[100] -translate-y-1/2">
+        <div className="w-full px-16 mt-6 relative z-10">
             <div className="grid grid-cols-5 gap-4 bg-black/30 p-6 rounded-2xl backdrop-blur-xl shadow-lg">
 
                 {/* CHỌN PHIM */}

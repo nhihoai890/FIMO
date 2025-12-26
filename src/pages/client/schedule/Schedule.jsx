@@ -1,4 +1,4 @@
-import React, { useContext, useState, useMemo } from "react";
+import React, { useContext, useState, useMemo, useEffect } from "react";
 import { CitiesContext } from "../../../contexts/CitiesProvider";
 import { CinemaLocationsContext } from "../../../contexts/CinemaLocationProvider";
 import { MoviesContext } from "../../../contexts/MovieProvider";
@@ -6,53 +6,66 @@ import { MovieScreeningContext } from "../../../contexts/MovieScreeningProvider"
 
 function Schedule() {
     const cities = useContext(CitiesContext);
-    const cinemas = useContext(CinemaLocationsContext);
+    const cinemaLocations = useContext(CinemaLocationsContext);
     const movies = useContext(MoviesContext);
-    const screenings = useContext(MovieScreeningContext);
+    const movieScreens = useContext(MovieScreeningContext);
+
+    const [selectedCity, setSelectedCity] = useState(null);
+    const [selectedCinema, setSelectedCinema] = useState(null);
 
     // City mặc định
-    const [selectedCity, setSelectedCity] = useState(
-        cities.length > 0 ? cities[0].idCity : ""
-    );
 
-    // Lọc rạp theo city
-    const filteredCinemas = useMemo(
-        () => cinemas.filter(c => c.idCity === selectedCity),
-        [selectedCity, cinemas]
-    );
 
-    const [selectedCinema, setSelectedCinema] = useState("");
 
-    // Khi đổi city -> chọn rạp đầu tiên
-    React.useEffect(() => {
+
+    useEffect(() => {
+        if (cities.length > 0 && !selectedCity) {
+            setSelectedCity(cities[0].idCity);
+        }
+        console.log("Selected city:", selectedCity);
+    }, [cities, selectedCity]);
+
+    const filteredCinemas = useMemo(() => {
+        if (!selectedCity) return [];
+        return cinemaLocations.filter(c => c.idCity === selectedCity);
+    }, [cinemaLocations, selectedCity]);
+
+    useEffect(() => {
         if (filteredCinemas.length > 0) {
             setSelectedCinema(filteredCinemas[0].idCinema);
+        } else {
+            setSelectedCinema("");
         }
     }, [filteredCinemas]);
 
-    // Lọc suất chiếu theo rạp
-    const screeningsAtCinema = useMemo(
-        () => screenings.filter(s => s.idCinema === selectedCinema),
-        [selectedCinema, screenings]
-    );
 
-    // Gom suất chiếu theo phim
     const moviesWithTimes = useMemo(() => {
+        if (!selectedCinema) return [];
+
+        // Lấy screening theo cinema
+        const screeningByCinema = movieScreens.filter(
+            s =>
+                s.idCinemaLocation === selectedCinema &&
+                s.idCity === selectedCity
+        );
+        // Gom theo movie
         return movies
             .map(movie => {
-                const times = screeningsAtCinema
+                const times = screeningByCinema
                     .filter(s => s.idMovie === movie.idMovie)
-                    .map(s => s.time);
+                    .flatMap(s => s.list_showtime);
 
                 if (times.length === 0) return null;
 
                 return {
                     ...movie,
-                    showtimes: times,
+                    showtimes: times
                 };
             })
-            .filter(m => m !== null);
-    }, [movies, screeningsAtCinema]);
+            .filter(Boolean);
+    }, [movies, movieScreens, selectedCinema]);
+
+
 
     return (
         <div className="mt-24 max-w-6xl mx-auto p-6 flex gap-6 bg-[#0f0f12] text-gray-200">
@@ -64,14 +77,14 @@ function Schedule() {
                 <ul className="p-3 space-y-2">
                     {cities.map(city => (
                         <button
-                            key={city.idCity}
-                            onClick={() => setSelectedCity(city.idCity)}
+                            key={city?.id}
+                            onClick={() => setSelectedCity(city.id)}
                             className={`w-full flex justify-between items-center px-3 py-2 rounded-xl transition 
                                 ${selectedCity === city.idCity
                                     ? "bg-blue-600 text-white"
                                     : "hover:bg-[#2a2a32] text-gray-300"}`}
                         >
-                            <span>{city.name}</span>
+                            <span>{city?.name}</span>
                         </button>
                     ))}
                 </ul>
@@ -84,8 +97,8 @@ function Schedule() {
                 <ul className="p-3 space-y-2">
                     {filteredCinemas.map(c => (
                         <button
-                            key={c.idCinema}
-                            onClick={() => setSelectedCinema(c.idCinema)}
+                            key={c.idCity}
+                            onClick={() => setSelectedCinema(c.idCity)}
                             className={`w-full text-left px-3 py-2 rounded-xl transition 
                                 ${selectedCinema === c.idCinema
                                     ? "bg-pink-600 text-white"
@@ -102,7 +115,7 @@ function Schedule() {
                 <h2 className="text-xl font-semibold text-white">
                     Phim chiếu tại:{" "}
                     <span className="text-blue-400">
-                        {filteredCinemas.find(c => c.idCinema === selectedCinema)?.name}
+                        {filteredCinemas.find(c => c.idCinemaLocation === selectedCinema)?.name}
                     </span>
                 </h2>
 
@@ -113,7 +126,7 @@ function Schedule() {
                 {moviesWithTimes.map(movie => (
                     <div key={movie.idMovie}
                         className="bg-[#1c1c22] border border-[#2a2a32] rounded-2xl p-4 flex gap-4 hover:shadow-2xl transition">
-                        
+
                         <img
                             src={movie.imgUrl}
                             className="w-24 h-36 object-cover rounded-xl"

@@ -28,7 +28,7 @@ function Main() {
             <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                Phim Đang Chiếu
             </h2>
-            <div className="rounded-2xl bg-gray-800/40 backdrop-blur-md p-5 shadow-xl border border-gray-700/40">
+            <div className="mt-5 rounded-2xl bg-gray-800/40 backdrop-blur-md p-5 shadow-xl border border-gray-700/40">
                <MovieSlider movieShow={movieShow} status={true} />
             </div>
          </section>
@@ -37,7 +37,7 @@ function Main() {
             <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
                Phim Sắp Chiếu
             </h2>
-            <div className="rounded-2xl bg-gray-800/40 backdrop-blur-md p-5 shadow-xl border border-gray-700/40">
+            <div className="mt-6 rounded-2xl bg-gray-800/40 backdrop-blur-md p-5 shadow-xl border border-gray-700/40">
                <MovieSlider movieShow={upComing} status={false} />
             </div>
          </section>

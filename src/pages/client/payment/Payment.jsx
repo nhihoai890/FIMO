@@ -1,6 +1,81 @@
-import React from 'react';
+import React, { useContext, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { BookingContext } from '../../../contexts/BookingProvider';
+import { MovieScreeningContext } from '../../../contexts/MovieScreeningProvider';
+import { MoviesContext } from '../../../contexts/MovieProvider';
+import { CinemaLocationsContext } from '../../../contexts/CinemaLocationProvider';
+import { RoomsContext } from '../../../contexts/RoomProvider';
+import { AuthContext } from '../../../contexts/AuthsProvider';
+import { ItemFoodsContext } from '../../../contexts/ItemFoodsProvider';
+import { getOjectById } from '../../../utils/functionContants';
+import { TypeChairsContext } from '../../../contexts/TypeChairProvider';
+import { FoodsContext } from '../../../contexts/FoodProvider';
+import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
+import { initialOptions } from '../../../utils/Contants';
+import { addDocument } from '../../../services/firebaseService';
+import { transformWithEsbuild } from 'vite';
+
 
 function Payment(props) {
+
+    const { id } = useParams();
+    const { isLogin } = useContext(AuthContext);
+    const bookings = useContext(BookingContext);
+    const movies = useContext(MoviesContext);
+    const typeChairs = useContext(TypeChairsContext);
+    const cinemaLocations = useContext(CinemaLocationsContext);
+    const movieScreens = useContext(MovieScreeningContext);
+    const rooms = useContext(RoomsContext);
+    const foods = useContext(FoodsContext);
+    const itemFoods = useContext(ItemFoodsContext);
+    const booking = bookings.find(b => b.id === id);
+    const selectFoods = itemFoods.filter(i => i.idBooking === id)
+    const movieScreening = movieScreens?.find(ms => ms.id === booking?.idMovieScreening);
+    const movie = movies.find(m => m.id === movieScreening?.idMovie);
+    const cinemaShow = cinemaLocations.find(cl => cl.id === movieScreening?.idCinemaLocation);
+    const showRoom = rooms.find(r => r.id === movieScreening?.idRoom);
+    const totalChair = useMemo(() => {
+        if (!booking || !movieScreening) return 0;
+
+        return booking.listChair.reduce((total, chair) => {
+            const typeChair = getOjectById(typeChairs, chair.idChair);
+            const price = typeChair?.price || 0;
+            const ratio = movieScreening?.ratio || 1;
+            return total + price * ratio;
+        }, 0);
+    }, [booking, typeChairs, movieScreening]);
+
+    const totalFood = useMemo(() => {
+        if (!selectFoods.length) return 0;
+        return selectFoods.reduce((total, item) => {
+            const food = getOjectById(foods, item.idFood);
+            const price = food?.price;
+            return total + price * item.quantity
+        }, 0)
+    }, [selectFoods, foods])
+
+    const totalPrice = useMemo(() => {
+        return totalChair + totalFood;
+    }, [totalChair, totalFood]);
+
+    const createSubscription =  async(transactionId) =>{
+        console.log("Thanh toan thanh cong");
+        // const newOrder = {
+        //    idMovieScreening: booking?.idMovieScreening ,
+        //    idAccount : booking?.idAccount ,
+        //    timeMovieScreen : booking?.time,
+        //    listchair: booking?.listChair,
+        //    total: totalPrice,
+        //    timePayment : new Date(),
+        //    method: "paypal",
+        //    transactionId: transactionId,
+        // }
+        // console.log(newOrder);
+        
+        // await addDocument("orders", newOrder);
+    }
+    console.log("webb");
+    
     return (
         <div className="mt-16 min-h-screen bg-[#0d0d0d] py-10">
             <div className="max-w-6xl mx-auto bg-[#1a1a1a] shadow-lg rounded-lg p-6">
@@ -10,22 +85,22 @@ function Payment(props) {
                     <div className='md:col-span-2 space-y-6'>
                         <div className="flex gap-4">
                             <img
-                                src="https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/c5f0a1eff4c394a251036189ccddaacd/c/g/cgv_350x495_1_2.jpg"
+                                src={movie?.imgUrl}
                                 alt="movie"
-                                className="rounded"
+                                className="rounded w-24"
                             />
                             <div>
                                 <h3 className="font-semibold text-lg text-white">
-                                    TRUY TÌM LONG DIÊN HƯƠNG
+                                    {movie?.name}
                                 </h3>
                                 <p className="text-sm text-gray-400">
-                                    RIO Hòa Khánh Đà Nẵng
+                                    {cinemaShow?.name} - {cinemaShow?.address}
                                 </p>
                                 <p className="text-sm text-gray-400">
-                                    Rạp: <span>01</span>
+                                    Rạp: <span>{showRoom?.name}</span>
                                 </p>
                                 <p className="text-sm text-gray-400">
-                                    Suất chiếu: 17/12/2025 - 21:50
+                                    Suất chiếu: <span> {movieScreening?.release_date} - {booking?.time}</span>
                                 </p>
                             </div>
                         </div>
@@ -34,28 +109,39 @@ function Payment(props) {
                                 THÔNG TIN NGƯỜI MUA
                             </h4>
                             <div className="p-4 space-y-1 text-sm">
-                                <p><strong>Họ tên:</strong> Phan Nhi</p>
-                                <p><strong>Email:</strong> nhihoai0510@gmail.com</p>
+                                <p><strong>Họ tên: </strong>{isLogin?.name}</p>
+                                <p><strong>Email:</strong> {isLogin?.email}</p>
                             </div>
                         </section>
 
                         <section>
                             <h4 className='bg-gray-700 text-white px-3 py-2 font-medium'>THÔNG TIN VÉ</h4>
                             <div className="p-4 text-sm flex justify-between">
-                                <span className="border border-red-500 text-red-500 px-2 py-1 rounded">
-                                    H07
-                                </span>
-                                <span>50.000 đ</span>
+                                <div className='flex gap-3'>
+                                    {booking?.listChair.map((seat, index) => (
+                                        <span key={index} className="border  border-red-500 text-red-500 px-2 py-1 rounded">
+                                            {seat?.seatCode}
+                                        </span>
+                                    ))}
+                                </div>
+
+                                <span>{totalChair.toLocaleString()}đ</span>
                             </div>
                         </section>
                         <section>
+
                             <h4 className="bg-gray-700 text-white px-3 py-2 font-medium">
                                 THÔNG TIN BẮP NƯỚC
                             </h4>
-                            <div className="p-4 text-sm flex justify-between">
-                                <span>Combo 1 Bắp Caramel + Pepsi 24oz</span>
-                                <span>89.000 đ</span>
-                            </div>
+                            {
+                                selectFoods.map((food, index) => (
+                                    <div key={index} className='p-4 text-sm flex justify-between'>
+                                        <span>{getOjectById(foods, food.idFood)?.name}</span>
+                                        <span>{food?.quantity} - {(getOjectById(foods, food.idFood)?.price * food?.quantity).toLocaleString()}đ</span>
+                                    </div>
+                                ))
+                            }
+
                         </section>
                     </div>
                     {/* RIGHT */}
@@ -66,43 +152,45 @@ function Payment(props) {
                         <div className='space-y-2 text-sm '>
                             <div className='flex justify-between'>
                                 <span>Vé</span>
-                                <span>50.000 đ</span>
+                                <span>{totalChair.toLocaleString()}đ</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>Combo</span>
-                                <span>89.000 đ</span>
+                                <span>{totalFood.toLocaleString()} đ</span>
                             </div>
                             <hr className="border-gray-700" />
                             <div className="flex justify-between font-semibold text-white">
                                 <span>TỔNG</span>
-                                <span className="text-red-500">139.000 đ</span>
-                            </div>
-                            <div className="mt-4">
-                                <label className="flex items-center gap-2 text-sm cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="payment"
-                                        className="accent-red-500"
-                                    />
-                                    VNPay
-                                </label>
-
-                                <label className="flex items-center gap-2 text-sm cursor-pointer mb--2">
-                                    <input
-                                        type="radio"
-                                        name="payment"
-                                        className="accent-red-500"
-                                    />
-                                    MoMo
-                                </label>
+                                <span className="text-red-500">{totalPrice.toLocaleString()} đ</span>
                             </div>
 
+                            <PayPalScriptProvider options={initialOptions}>
+                                <PayPalButtons
+                                    style={{ layout: "vertical" }}
+                                    createOrder={(data, actions) => {
+                                        const totalPayPal = totalPrice / 25000
+                                        return actions.order.create({
+                                            purchase_units: [{
+                                                amount: {
+                                                    value: totalPayPal.toFixed(2)
+                                                }
+                                            }]
+                                        });
+                                    }}
+                                    onApprove={(data, actions) => {
+                                        return actions.order.capture().then((details) => {
+                                            const transactionId = details.id; // Lấy ID giao dịch từ PayPal
+                                            createSubscription(transactionId);
+                                        });
+                                    }}
+                                    onError={(err) => {
+                                        console.error("PayPal error:", err);
+                                    }}
+                                />
+                            </PayPalScriptProvider>
 
 
 
-                            <button className="mt-6 w-full bg-red-600 text-white py-2 rounded hover:bg-red-700">
-                                Thanh Toán
-                            </button>
                         </div>
                     </div>
                 </div>

@@ -31,57 +31,38 @@ function Booking() {
     const dataRoom = useMemo(() => getOjectById(rooms, showRoom.idRoom), [id, rooms]);
     const movieShow = useMemo(() => getOjectById(movies, showRoom.idMovie), [showRoom, id]);
     const cinemaShow = useMemo(() => getOjectById(cinemaLocations, showRoom.idCinemaLocation), [showRoom, id])
+ 
 
-    const coupleSeat = (idChair) => {
-        const type = getOjectById(typeChairs, idChair);
-        return type?.name === "Ghế Đôi"
-    }
 
     const handleBooking = async (value) => {
         if (!isLogin) {
             alert("vui long dang nhap");
             return;
         }
-        const couple = coupleSeat(value.idChair);
-        const seat = couple
-            ? { ...value, col: value.col % 2 === 0 ? value.col : value.col - 1 }
-            : value;
         // xem da tung booking xuat chieu nay chua 
         const oldBooking = bookings.find(e => e.idMovieScreening == id && e.idAccount == isLogin.id && e.time == showtime);
         if (oldBooking) {
-            const check = oldBooking.listChair.findIndex(
-                c => c.row == seat.row && c.col == seat.col && c.idChair == seat.idChair);
+            const check = oldBooking.listChair.findIndex(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair);
             if (check != -1) {
                 oldBooking.listChair = oldBooking.listChair.filter((_, index) => index != check);
                 await updateDocument("bookings", oldBooking);
             } else {
-                oldBooking.listChair.push(seat);
+                oldBooking.listChair.push(value);
                 await updateDocument("bookings", oldBooking);
             }
         } else {
-            const newBooking = { idMovieScreening: id, idAccount: isLogin.id, time: showtime, listChair: [seat] };
+            const newBooking = { idMovieScreening: id, idAccount: isLogin.id, time: showtime, listChair: [value] };
             await addDocument("bookings", newBooking);
         }
 
     }
 
     const showImgUrl = (value) => {
-        const couple = coupleSeat(value.idChair);
-        const seat = couple
-            ? { ...value, col: value.col % 2 === 0 ? value.col : value.col - 1 }
-            : value;
-        const check = bookings.some(e =>
-            e.idMovieScreening == id &&
-            e.idAccount == isLogin?.id &&
-            e.time == showtime &&
-            e.listChair.some(c =>
-                c.row == seat.row &&
-                c.col == seat.col &&
-                c.idChair == seat.idChair
-            ));
+        const check = bookings.some(e => e.idMovieScreening == id && e.idAccount == isLogin?.id && e.time == showtime
+            && e.listChair.some(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair));
         return check ? selected : getOjectById(typeChairs, value.idChair)?.imgUrl;
     }
-
+    
     const selectBooking = useMemo(() => {
         return bookings.find(b =>
             b.idMovieScreening == id &&
@@ -89,33 +70,7 @@ function Booking() {
             b.time == showtime
         );
     }, [bookings, id, isLogin, showtime]);
-
-    const displaySeat = useMemo(() => {
-        if (!selectBooking) return [];
-
-        const result = [];
-
-        selectBooking.listChair.forEach(se => {
-            const type = getOjectById(typeChairs, se.idChair);
-
-            if (type?.name === "Ghế Đôi") {
-
-                const match = se.seatCode.match(/^([A-Z]+)(\d+)$/);
-
-                if (match) {
-                    const row = match[1];
-                    const num = Number(match[2]);
-
-                    result.push(`${row}${num}`);
-                    result.push(`${row}${num + 1}`);
-                }
-            } else {
-                result.push(se.seatCode);
-            }
-        });
-
-        return result;
-    }, [selectBooking, typeChairs]);
+   
 
 
 
@@ -143,46 +98,28 @@ function Booking() {
                 </div>
 
                 {/* Seat Legend */}
-                <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm">
-
-                    {/* Ghế thường */}
+                <div className="flex flex-wrap gap-4 justify-center mt-4 text-sm">
                     <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 rounded bg-sky-400"></div>
+                        <img src={standard} alt="Ghế thường" className="w-5 h-5" />
                         <span>Ghế thường</span>
                     </div>
-
-                    {/* Ghế VIP */}
                     <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 rounded bg-red-500"></div>
-                        <span>Ghế VIP</span>
-                    </div>
-
-                    {/* Ghế đôi */}
-                    <div className="flex items-center gap-2">
-                        <div className="w-10 h-5 rounded bg-purple-500"></div>
+                        <img src={couple} alt="Ghế thường" className="w-5 h-5" />
                         <span>Ghế đôi</span>
                     </div>
-
-                    {/* Ghế đã bán */}
                     <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 rounded bg-gray-600"></div>
+                        <img src={vip} alt="Ghế thường" className="w-5 h-5" />
+                        <span>Ghế Vip</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <img src={seat} alt="Ghế thường" className="w-5 h-5" />
                         <span>Ghế đã bán</span>
                     </div>
-
-                    {/* Ghế đang chọn */}
                     <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 rounded bg-yellow-400 ring-2 ring-yellow-300"></div>
+                        <img src={selected} alt="Ghế thường" className="w-5 h-5" />
                         <span>Ghế đang chọn</span>
                     </div>
-
-                     <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 rounded bg-green-400 ring-2 ring-green-300"></div>
-                        <span>Ghế đã được chọn</span>
-                    </div>
-
                 </div>
-
-
             </div>
 
             {/* Right Panel: Movie Info */}
@@ -198,7 +135,7 @@ function Booking() {
                     <p><span className="font-semibold">{dataRoom?.name}</span></p>
                     <p>Rạp: <span className='font-semibold'>{cinemaShow?.name}</span></p>
                     <p>Suất: <span className="font-semibold">{showtime}</span> - {showRoom?.release_date}</p>
-                    <p>Ghế: <span className="font-semibold">{displaySeat.join(', ')}</span></p>
+                     <p>Ghế: <span className="font-semibold">{selectBooking?.listChair.map(e => e.seatCode).toString()}</span></p>
                 </div>
 
                 <div className="border-t border-white/10 pt-4">
