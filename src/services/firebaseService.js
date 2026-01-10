@@ -24,13 +24,28 @@ export const fetchDocumentsRealtime = (collectionName, callback) => {
 // Thêm tài liệu mới vào một bộ sưu tập cụ thể với tùy chọn tải lên hình ảnh
 export const addDocument = async (collectionName, values) => {
   try {
-    if (values.imgUrl) {
-      const imgUrl = await uploadImageToCloudinary(values.imgUrl, collectionName);
-      values.imgUrl = imgUrl;
+    let newValues = { ...values };
+
+    if (newValues.imgUrl) {
+      const imgUrl = await uploadImageToCloudinary(
+        newValues.imgUrl,
+        collectionName
+      );
+      newValues.imgUrl = imgUrl;
     }
-    await addDoc(collection(db, collectionName), values);
+
+    const docRef = await addDoc(
+      collection(db, collectionName),
+      newValues
+    );
+
+    // ✅ return object vừa tạo (chuẩn frontend dùng)
+    return {
+      id: docRef.id,
+      ...newValues,
+    };
   } catch (error) {
-    console.error('Error adding document:', error);
+    console.error("Error adding document:", error);
     throw error;
   }
 };

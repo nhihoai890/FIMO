@@ -13,12 +13,14 @@ import CinemaLocationProvider from "./contexts/CinemaLocationProvider";
 import TypeChairProvider from "./contexts/TypeChairProvider";
 import RoomProvider from "./contexts/RoomProvider";
 import FoodProvider from "./contexts/FoodProvider";
-import MovieScreeningProvider, { MovieScreeningContext } from "./contexts/MovieScreeningProvider";
+import MovieScreeningProvider from "./contexts/MovieScreeningProvider";
 import AccountProvider from "./contexts/AccountProvider";
 import { NotificationProvider } from "./contexts/NotificationProvider";
 import AuthsProvider from "./contexts/AuthsProvider";
 import BookingProvider from "./contexts/BookingProvider";
 import ItemFoodsProvider from "./contexts/ItemFoodsProvider";
+import OrdersProvider from "./contexts/OrdersProvider";
+import OrderDetailsProvider from "./contexts/OrderDetailsProvider";
 
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -39,7 +41,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                               <AuthsProvider>
                                 <BookingProvider>
                                   <ItemFoodsProvider>
-                                    <App />
+                                    <OrdersProvider>
+                                      <OrderDetailsProvider>
+                                        <App />
+                                      </OrderDetailsProvider>
+                                    </OrdersProvider>
                                   </ItemFoodsProvider>
                                 </BookingProvider>
                               </AuthsProvider>

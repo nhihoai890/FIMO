@@ -13,6 +13,7 @@ import Booking from '../pages/client/booking/Booking';
 import Order from '../pages/client/combo/Order';
 import Payment from '../pages/client/payment/Payment';
 import HistoryBooking from '../pages/client/booking/HistoryBooking';
+import ViewBooking from '../pages/client/booking/ViewBooking';
 
 
 
@@ -74,16 +75,20 @@ function ClientRouters(props) {
             path: "/history",
             element:<HistoryBooking />
         },
+        {
+            path: "/view/:id",
+            element: <ViewBooking />
+        }
         
 
     ]
     return (
         <div>
             <Routes>
-                 <Route path="/" element={<Main />} />
+                 <Route  path="/" element={<Main />} />
                 {
                     routers.map(e => (
-                        <Route path={e.path} element={e.element} />
+                        <Route  key={e.path} path={e.path} element={e.element} />
                     ))
                 }
             </Routes>

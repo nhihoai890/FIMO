@@ -1,161 +1,194 @@
-import React, { useContext, useState, useMemo, useEffect } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { CitiesContext } from "../../../contexts/CitiesProvider";
 import { CinemaLocationsContext } from "../../../contexts/CinemaLocationProvider";
 import { MoviesContext } from "../../../contexts/MovieProvider";
 import { MovieScreeningContext } from "../../../contexts/MovieScreeningProvider";
 
 function Schedule() {
-    const cities = useContext(CitiesContext);
-    const cinemaLocations = useContext(CinemaLocationsContext);
-    const movies = useContext(MoviesContext);
-    const movieScreens = useContext(MovieScreeningContext);
+  const cities = useContext(CitiesContext);
+  const cinemaLocations = useContext(CinemaLocationsContext);
+  const movies = useContext(MoviesContext);
+  const movieScreens = useContext(MovieScreeningContext);
 
-    const [selectedCity, setSelectedCity] = useState(null);
-    const [selectedCinema, setSelectedCinema] = useState(null);
-
-    // City mặc định
-
+  const [activeCityId, setActiveCityId] = useState(null);
+  const [activeCinemaLocationId, setActiveCinemaLocationId] = useState(null);
+  const [activeDate, setActiveDate] = useState(null);
 
 
+  useEffect(() => {
+    if (!activeCityId) return;
 
-    useEffect(() => {
-        if (cities.length > 0 && !selectedCity) {
-            setSelectedCity(cities[0].idCity);
-        }
-        console.log("Selected city:", selectedCity);
-    }, [cities, selectedCity]);
-
-    const filteredCinemas = useMemo(() => {
-        if (!selectedCity) return [];
-        return cinemaLocations.filter(c => c.idCity === selectedCity);
-    }, [cinemaLocations, selectedCity]);
-
-    useEffect(() => {
-        if (filteredCinemas.length > 0) {
-            setSelectedCinema(filteredCinemas[0].idCinema);
-        } else {
-            setSelectedCinema("");
-        }
-    }, [filteredCinemas]);
-
-
-    const moviesWithTimes = useMemo(() => {
-        if (!selectedCinema) return [];
-
-        // Lấy screening theo cinema
-        const screeningByCinema = movieScreens.filter(
-            s =>
-                s.idCinemaLocation === selectedCinema &&
-                s.idCity === selectedCity
-        );
-        // Gom theo movie
-        return movies
-            .map(movie => {
-                const times = screeningByCinema
-                    .filter(s => s.idMovie === movie.idMovie)
-                    .flatMap(s => s.list_showtime);
-
-                if (times.length === 0) return null;
-
-                return {
-                    ...movie,
-                    showtimes: times
-                };
-            })
-            .filter(Boolean);
-    }, [movies, movieScreens, selectedCinema]);
-
-
-
-    return (
-        <div className="mt-24 max-w-6xl mx-auto p-6 flex gap-6 bg-[#0f0f12] text-gray-200">
-
-            {/* CỘT TRÁI – CITY */}
-            <div className="w-1/4 bg-[#1a1a1f] rounded-2xl border border-[#24242a]">
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-3 text-white font-semibold">Khu vực</div>
-
-                <ul className="p-3 space-y-2">
-                    {cities.map(city => (
-                        <button
-                            key={city?.id}
-                            onClick={() => setSelectedCity(city.id)}
-                            className={`w-full flex justify-between items-center px-3 py-2 rounded-xl transition 
-                                ${selectedCity === city.idCity
-                                    ? "bg-blue-600 text-white"
-                                    : "hover:bg-[#2a2a32] text-gray-300"}`}
-                        >
-                            <span>{city?.name}</span>
-                        </button>
-                    ))}
-                </ul>
-            </div>
-
-            {/* CỘT GIỮA – CINEMA */}
-            <div className="w-1/4 bg-[#1a1a1f] rounded-2xl border border-[#24242a]">
-                <div className="bg-gradient-to-r from-pink-600 to-purple-600 p-3 text-white font-semibold">Rạp</div>
-
-                <ul className="p-3 space-y-2">
-                    {filteredCinemas.map(c => (
-                        <button
-                            key={c.idCity}
-                            onClick={() => setSelectedCinema(c.idCity)}
-                            className={`w-full text-left px-3 py-2 rounded-xl transition 
-                                ${selectedCinema === c.idCinema
-                                    ? "bg-pink-600 text-white"
-                                    : "hover:bg-[#2a2a32] text-gray-300"}`}
-                        >
-                            {c.name}
-                        </button>
-                    ))}
-                </ul>
-            </div>
-
-            {/* CỘT PHẢI – MOVIE */}
-            <div className="w-1/2 space-y-4">
-                <h2 className="text-xl font-semibold text-white">
-                    Phim chiếu tại:{" "}
-                    <span className="text-blue-400">
-                        {filteredCinemas.find(c => c.idCinemaLocation === selectedCinema)?.name}
-                    </span>
-                </h2>
-
-                {moviesWithTimes.length === 0 && (
-                    <div className="text-gray-400">Không có suất chiếu.</div>
-                )}
-
-                {moviesWithTimes.map(movie => (
-                    <div key={movie.idMovie}
-                        className="bg-[#1c1c22] border border-[#2a2a32] rounded-2xl p-4 flex gap-4 hover:shadow-2xl transition">
-
-                        <img
-                            src={movie.imgUrl}
-                            className="w-24 h-36 object-cover rounded-xl"
-                            alt={movie.name}
-                        />
-
-                        <div className="flex-1">
-                            <div className="text-lg text-white font-semibold">{movie.name}</div>
-                            <div className="text-gray-400 text-sm">
-                                {movie.ageLimit} • {movie.duration} phút
-                            </div>
-
-                            <div className="flex flex-wrap gap-2 mt-3">
-                                {movie.showtimes.map(t => (
-                                    <button
-                                        key={t}
-                                        className="px-3 py-1.5 border border-blue-500 text-blue-400 rounded-xl hover:bg-blue-600 hover:text-white transition"
-                                    >
-                                        {t}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-        </div>
+    const cinemas = cinemaLocations.filter(
+      (c) => c.idCity === activeCityId
     );
+
+    setActiveCinemaLocationId(cinemas[0]?.id || null);
+    setActiveDate(null);
+  }, [activeCityId, cinemaLocations]);
+
+  useEffect(() => {
+    if (!activeCinemaLocationId) return;
+
+    const screens = movieScreens.filter(
+      (s) => s.idCinemaLocation === activeCinemaLocationId
+    );
+
+    setActiveDate(screens[0]?.release_date || null);
+  }, [activeCinemaLocationId, movieScreens]);
+
+  const cinemas = useMemo(() => {
+    return cinemaLocations.filter(
+      (c) => c.idCity === activeCityId
+    );
+  }, [cinemaLocations, activeCityId]);
+
+  const dates = useMemo(() => {
+    const list = movieScreens
+      .filter((s) => s.idCinemaLocation === activeCinemaLocationId)
+      .map((s) => s.release_date);
+
+    return [...new Set(list)];
+  }, [movieScreens, activeCinemaLocationId]);
+
+  const screens = useMemo(() => {
+    return movieScreens.filter(
+      (s) =>
+        s.idCinemaLocation === activeCinemaLocationId &&
+        s.release_date === activeDate
+    );
+  }, [movieScreens, activeCinemaLocationId, activeDate]);
+
+  const scheduleMovies = useMemo(() => {
+    const map = {};
+
+    screens.forEach((screen) => {
+      if (!map[screen.idMovie]) {
+        const movie = movies.find((m) => m.id === screen.idMovie);
+        if (!movie) return;
+
+        map[screen.idMovie] = {
+          id: movie.id,
+          title: movie.name,
+          duration: movie.duration,
+          ageLimit: movie.ageLimit,
+          imgUrl: movie.imgUrl,
+          times: [],
+        };
+      }
+
+      map[screen.idMovie].times.push(...screen.list_showtime);
+    });
+
+    return Object.values(map);
+  }, [screens, movies]);
+
+  /* ================= UI ================= */
+  return (
+    <div className="min-h-screen bg-[#0B0F14] text-gray-200 px-6 py-10">
+      <h1 className="text-2xl font-bold text-center mb-8">
+        Lịch Chiếu Phim
+      </h1>
+
+      <div className="grid grid-cols-12 gap-6">
+        {/* CITY */}
+        <div className="col-span-2 bg-[#111827] rounded-xl p-4">
+          <h2 className="font-semibold mb-4">Khu vực</h2>
+          {cities.map((city) => (
+            <button
+              key={city.id}
+              onClick={() => setActiveCityId(city.id)}
+              className={`w-full text-left px-3 py-2 rounded-lg mb-2
+                ${
+                  activeCityId === city.id
+                    ? "bg-blue-600 text-white"
+                    : "hover:bg-gray-700"
+                }`}
+            >
+              {city.name}
+            </button>
+          ))}
+        </div>
+
+        {/* CINEMA */}
+        <div className="col-span-3 bg-[#111827] rounded-xl p-4">
+          <h2 className="font-semibold mb-4">Rạp</h2>
+          {cinemas.map((cinema) => (
+            <button
+              key={cinema.id}
+              onClick={() => {
+                setActiveCinemaLocationId(cinema.id);
+                setActiveDate(null);
+              }}
+              className={`w-full text-left px-3 py-2 rounded-lg mb-2
+                ${
+                  activeCinemaLocationId === cinema.id
+                    ? "bg-blue-600 text-white"
+                    : "hover:bg-gray-700"
+                }`}
+            >
+              {cinema.name}
+            </button>
+          ))}
+        </div>
+
+        {/* SCHEDULE */}
+        <div className="col-span-7">
+          {/* DATE */}
+          <div className="flex gap-3 mb-6">
+            {dates.map((date) => (
+              <button
+                key={date}
+                onClick={() => setActiveDate(date)}
+                className={`px-4 py-2 rounded-lg border
+                  ${
+                    activeDate === date
+                      ? "bg-blue-600 border-blue-600 text-white"
+                      : "border-gray-600 hover:bg-gray-700"
+                  }`}
+              >
+                {date}
+              </button>
+            ))}
+          </div>
+
+          {/* MOVIES */}
+          <div className="space-y-6">
+            {scheduleMovies.map((movie) => (
+              <div
+                key={movie.id}
+                className="bg-[#111827] rounded-xl p-5"
+              >
+                <h3 className="text-lg font-semibold mb-1">
+                  {movie.title}
+                </h3>
+                <p className="text-sm text-gray-400 mb-4">
+                  {movie.duration} phút • {movie.ageLimit}
+                </p>
+
+                <div className="flex flex-wrap gap-3">
+                  {movie.times.map((time, idx) => (
+                    <button
+                      key={idx}
+                      className="px-4 py-2 rounded-lg border border-blue-500
+                      text-blue-400 hover:bg-blue-500 hover:text-white transition"
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {!scheduleMovies.length && (
+              <p className="text-gray-400 text-center">
+                Không có suất chiếu
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Schedule;

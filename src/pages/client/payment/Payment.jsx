@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { BookingContext } from '../../../contexts/BookingProvider';
 import { MovieScreeningContext } from '../../../contexts/MovieScreeningProvider';
 import { MoviesContext } from '../../../contexts/MovieProvider';
@@ -12,8 +12,7 @@ import { TypeChairsContext } from '../../../contexts/TypeChairProvider';
 import { FoodsContext } from '../../../contexts/FoodProvider';
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { initialOptions } from '../../../utils/Contants';
-import { addDocument } from '../../../services/firebaseService';
-import { transformWithEsbuild } from 'vite';
+import { addDocument, deleteDocument } from '../../../services/firebaseService';
 
 
 function Payment(props) {
@@ -27,6 +26,7 @@ function Payment(props) {
     const movieScreens = useContext(MovieScreeningContext);
     const rooms = useContext(RoomsContext);
     const foods = useContext(FoodsContext);
+    const navigate = useNavigate()
     const itemFoods = useContext(ItemFoodsContext);
     const booking = bookings.find(b => b.id === id);
     const selectFoods = itemFoods.filter(i => i.idBooking === id)
@@ -58,24 +58,30 @@ function Payment(props) {
         return totalChair + totalFood;
     }, [totalChair, totalFood]);
 
-    const createSubscription =  async(transactionId) =>{
-        console.log("Thanh toan thanh cong");
-        // const newOrder = {
-        //    idMovieScreening: booking?.idMovieScreening ,
-        //    idAccount : booking?.idAccount ,
-        //    timeMovieScreen : booking?.time,
-        //    listchair: booking?.listChair,
-        //    total: totalPrice,
-        //    timePayment : new Date(),
-        //    method: "paypal",
-        //    transactionId: transactionId,
-        // }
-        // console.log(newOrder);
-        
-        // await addDocument("orders", newOrder);
+    const createSubscription = async (transactionId) => {
+        const newOrder = {
+            idMovieScreening: booking?.idMovieScreening,
+            idAccount: booking?.idAccount,
+            timeMovieScreen: booking?.time,
+            listchair: booking?.listChair,
+            total: totalPrice,
+            timePayment: new Date(),
+            method: "paypal",
+            transactionId: transactionId,
+        }
+
+        const order = await addDocument("orders", newOrder);
+        const newFoods = selectFoods.map(({ id, ...rest }) => ({
+            ...rest,
+            id_order: order.id,
+        }));
+        await Promise.all(newFoods.map((item) => addDocument("OrderDetails", item)));
+        await Promise.all(selectFoods.map((item) => deleteDocument("itemFoods", item)));
+        navigate("/history")
+
     }
-    console.log("webb");
-    
+
+
     return (
         <div className="mt-16 min-h-screen bg-[#0d0d0d] py-10">
             <div className="max-w-6xl mx-auto bg-[#1a1a1a] shadow-lg rounded-lg p-6">

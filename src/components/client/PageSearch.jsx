@@ -1,9 +1,10 @@
 import { Autocomplete, Button, TextField } from '@mui/material';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { MoviesContext } from '../../contexts/MovieProvider';
 import { MovieScreeningContext } from '../../contexts/MovieScreeningProvider';
 import { CinemaLocationsContext } from '../../contexts/CinemaLocationProvider';
-import { getMoviesWithUpcomingShowtimes } from '../../utils/functionContants';
+import { getMoviesWithUpcomingShowtimes, getOjectById } from '../../utils/functionContants';
+import { Link } from 'react-router-dom';
 
 const inner = { movieId: "" };
 
@@ -11,7 +12,6 @@ function PageSearch() {
     const movies = useContext(MoviesContext);
     const movieScreen = useContext(MovieScreeningContext);
     const cinemaLocation = useContext(CinemaLocationsContext);
-
     const [movieShow, setMovieShow] = useState([]);
     const [locationShow, setLocationShow] = useState([]);
     const [search, setSearch] = useState(inner);
@@ -47,9 +47,27 @@ function PageSearch() {
         return location.filter(loc => movieIds.has(loc.id));
     }
 
+    const getSearchMovieScreen = useMemo(() => {
+        const now = new Date();
+        const next7Days = new Date();
+        next7Days.setDate(now.getDate() + 7);
+        return movieScreen.filter(st => {
+            const showDate = new Date(st.release_date);
+            return (
+                showDate >= now &&
+                showDate <= next7Days &&
+                st.idMovie == search.movieId &&
+                st.idCinemaLocation == search.locationId
+            );
+        })
+    }, [search])
+    console.log(getSearchMovieScreen);
+
+
     const handleChangeInput = (e) => {
         setSearch({ ...search, [e.target.name]: e.target.value });
     };
+
 
     const inputStyle = {
         '& .MuiOutlinedInput-root': {
@@ -85,14 +103,20 @@ function PageSearch() {
                 <Autocomplete
                     options={locationShow}
                     getOptionLabel={(o) => o?.name || ""}
+                    onChange={(event, value) =>
+                        handleChangeInput({ target: { name: "locationId", value: value?.id } })
+                    }
                     renderInput={(params) => (
                         <TextField {...params} label="Chọn Rạp" sx={inputStyle} />
                     )}
                 />
 
                 <Autocomplete
-                    options={movies}
-                    getOptionLabel={(o) => o?.name || ""}
+                    options={getSearchMovieScreen}
+                    getOptionLabel={(o) => o?.release_date || ""}
+                    onChange={(event, value) =>
+                        handleChangeInput({ target: { name: "movieScreenId", value: value?.id } })
+                    }
                     renderInput={(params) => (
                         <TextField {...params} label="Chọn Ngày" sx={inputStyle} />
                     )}
@@ -100,21 +124,27 @@ function PageSearch() {
 
                 {/* GIỜ (demo) */}
                 <Autocomplete
-                    options={movies}
-                    getOptionLabel={(o) => o?.name || ""}
+                    options={getOjectById(movieScreen, search.movieScreenId).list_showtime}
+                    getOptionLabel={(o) => o || ""}
+                    onChange={(event, value) =>
+                        handleChangeInput({ target: { name: "time", value: value } })
+                    }
                     renderInput={(params) => (
                         <TextField {...params} label="Chọn Giờ" sx={inputStyle} />
                     )}
                 />
 
                 {/* BUTTON */}
-                <Button
-                    variant="contained"
-                    className="!bg-gradient-to-r !from-purple-500 !to-blue-500 
+                <Link to={`/booking/${search.movieScreenId}/${search.time}`}>
+                    <Button
+                        variant="contained"
+                        className="!bg-gradient-to-r !from-purple-500 !to-blue-500 
                                !text-white !font-semibold !rounded-xl !shadow-lg hover:opacity-90"
-                >
-                    Mua vé nhanh
-                </Button>
+                    >
+                        Mua vé nhanh
+                    </Button>
+                </Link>
+
             </div>
         </div>
     );

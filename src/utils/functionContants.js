@@ -1,15 +1,15 @@
 
 export const getOjectById = (data, id) => {
-      return data?.find(e => e.id == id) ? data?.find(e => e.id == id) : "unknown";
+    return data?.find(e => e.id == id) ? data?.find(e => e.id == id) : "unknown";
 }
 
 export const filterById = (data, id, title) => {
-      return data.filter(e => e[title] == id) || []
+    return data.filter(e => e[title] == id) || []
 }
 
 export const getMoviesWithUpcomingShowtimes = (movies, movieScreen) => {
     const now = new Date();
-    now.setHours(0,0,0,0); 
+    now.setHours(0, 0, 0, 0);
 
     const next7Days = new Date(now);
     next7Days.setDate(now.getDate() + 7);
@@ -18,7 +18,7 @@ export const getMoviesWithUpcomingShowtimes = (movies, movieScreen) => {
         movieScreen
             .filter(st => {
                 const showDate = new Date(st.release_date);
-                showDate.setHours(0,0,0,0); 
+                showDate.setHours(0, 0, 0, 0);
                 return showDate >= now && showDate <= next7Days;
             })
             .map(st => st.idMovie)
@@ -29,7 +29,7 @@ export const getMoviesWithUpcomingShowtimes = (movies, movieScreen) => {
 
 
 export const getMoviesWithShowtimesAfter7Days = (movies, movieScreen) => {
-        const now = new Date();
+    const now = new Date();
     const next7Days = new Date();
     next7Days.setDate(now.getDate() + 7);
 
@@ -37,7 +37,7 @@ export const getMoviesWithShowtimesAfter7Days = (movies, movieScreen) => {
         movieScreen
             .filter(st => {
                 const showDate = new Date(st.release_date);
-                return showDate > next7Days;   
+                return showDate > next7Days;
             })
             .map(st => st.idMovie)
     );
@@ -47,25 +47,25 @@ export const getMoviesWithShowtimesAfter7Days = (movies, movieScreen) => {
 
 
 export const getShowDatesOfMovieWithin7Days = (idMovie, movieScreen) => {
-      const now = new Date();
-      const next7Days = new Date();
-      next7Days.setDate(now.getDate() + 7);
+    const now = new Date();
+    const next7Days = new Date();
+    next7Days.setDate(now.getDate() + 7);
 
-      // Lọc đúng lịch chiếu của bộ phim này trong 7 ngày tới
-      const dates = movieScreen
-            .filter(st => st.idMovie === idMovie)
-            .filter(st => {
-                  const showDate = new Date(st.release_date);
-                  console.log(showDate , now);
-                  return showDate >= now ;
-            })
-      console.log(dates);
+    // Lọc đúng lịch chiếu của bộ phim này trong 7 ngày tới
+    const dates = movieScreen
+        .filter(st => st.idMovie === idMovie)
+        .filter(st => {
+            const showDate = new Date(st.release_date);
+            console.log(showDate, now);
+            return showDate >= now;
+        })
+    console.log(dates);
 
-      // Xóa trùng + sắp xếp
-      const uniqueSortedDates = Array.from(new Set(dates))
-            .sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
+    // Xóa trùng + sắp xếp
+    const uniqueSortedDates = Array.from(new Set(dates))
+        .sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
 
-      return uniqueSortedDates;
+    return uniqueSortedDates;
 };
 
 export function getNext7Days() {
