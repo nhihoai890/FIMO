@@ -3,6 +3,7 @@ import { CiImageOn } from "react-icons/ci";
 import { FaBowlFood } from "react-icons/fa6";
 import { IoLocationSharp } from "react-icons/io5";
 import { MdDashboard, MdEventSeat, MdGroup } from "react-icons/md";
+import { RiFolderUserFill } from "react-icons/ri";
 
 export const LISTMENU = [
    {
@@ -11,6 +12,13 @@ export const LISTMENU = [
       icon: <MdDashboard />,
       items: []
    },
+   {
+      name: "User Pages",
+      path: "/user-pages",
+      icon: <RiFolderUserFill />,
+      items: []
+   },
+
    {
       name: "Categories",
       path: "/categories",
@@ -98,13 +106,13 @@ export const LISTMENU = [
 ]
 
 export const ROLES = {
-    ADMIN: 'admin',        // Quản trị viên cấp cao
-    MODERATOR: 'moderator', // Quản trị viên cấp trung (người kiểm duyệt)
-    USER: 'user',          // Người dùng thông thường
+   ADMIN: 'admin',        // Quản trị viên cấp cao
+   MODERATOR: 'moderator', // Quản trị viên cấp trung (người kiểm duyệt)
+   USER: 'user',          // Người dùng thông thường
 };
 
 export const initialOptions = {
-  "client-id": "AYqvtd5X5hNlRSHnWjYawjjB87lETr0CT7y533a5b9Si70PYmoRI9djY7_qOYSB1xCfR_a_NM8vtJSI6",
-  currency: "USD",
-  intent: "capture"
+   "client-id": "AYqvtd5X5hNlRSHnWjYawjjB87lETr0CT7y533a5b9Si70PYmoRI9djY7_qOYSB1xCfR_a_NM8vtJSI6",
+   currency: "USD",
+   intent: "capture"
 };

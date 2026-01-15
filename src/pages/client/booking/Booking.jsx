@@ -31,8 +31,6 @@ function Booking() {
     const dataRoom = useMemo(() => getOjectById(rooms, showRoom.idRoom), [id, rooms]);
     const movieShow = useMemo(() => getOjectById(movies, showRoom.idMovie), [showRoom, id]);
     const cinemaShow = useMemo(() => getOjectById(cinemaLocations, showRoom.idCinemaLocation), [showRoom, id])
- 
-
 
     const handleBooking = async (value) => {
         if (!isLogin) {
@@ -62,7 +60,7 @@ function Booking() {
             && e.listChair.some(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair));
         return check ? selected : getOjectById(typeChairs, value.idChair)?.imgUrl;
     }
-    
+
     const selectBooking = useMemo(() => {
         return bookings.find(b =>
             b.idMovieScreening == id &&
@@ -70,9 +68,16 @@ function Booking() {
             b.time == showtime
         );
     }, [bookings, id, isLogin, showtime]);
-   
 
 
+    const handleClearBooking = async () => {
+        if (!selectBooking) return;
+
+        await updateDocument("bookings", {
+            ...selectBooking,
+            listChair: []
+        });
+    };
 
     const totalPrice = useMemo(() => {
         if (!selectBooking) return 0;
@@ -135,7 +140,7 @@ function Booking() {
                     <p><span className="font-semibold">{dataRoom?.name}</span></p>
                     <p>Rạp: <span className='font-semibold'>{cinemaShow?.name}</span></p>
                     <p>Suất: <span className="font-semibold">{showtime}</span> - {showRoom?.release_date}</p>
-                     <p>Ghế: <span className="font-semibold">{selectBooking?.listChair.map(e => e.seatCode).toString()}</span></p>
+                    <p>Ghế: <span className="font-semibold">{selectBooking?.listChair.map(e => e.seatCode).toString()}</span></p>
                 </div>
 
                 <div className="border-t border-white/10 pt-4">
@@ -146,7 +151,7 @@ function Booking() {
                 </div>
 
                 <div className="flex justify-between pt-4 gap-2">
-                    <button className="flex-1 px-4 py-3 rounded-xl bg-gray-700 hover:bg-gray-600 transition">Quay lại</button>
+                    <button onClick={handleClearBooking} className="flex-1 px-4 py-3 rounded-xl bg-gray-700 hover:bg-gray-600 transition">Quay lại</button>
                     <Link to={`/order/${selectBooking?.id}/${cinemaShow?.id}`}>
                         <button className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 hover:scale-105 transition text-white font-semibold">Tiếp tục</button>
                     </Link>

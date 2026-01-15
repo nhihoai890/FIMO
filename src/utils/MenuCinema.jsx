@@ -4,7 +4,7 @@ export const MENUCINEMA = [
         path: "/main",
         items : []
     },
-
+     
     {
        name: "Phim",
        items : [

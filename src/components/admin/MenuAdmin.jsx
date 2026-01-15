@@ -117,7 +117,11 @@ function MenuAdmin() {
                    hover:border-cyan-400/30 shadow-sm neon-glow"
         >
           <RiFolderUserFill className="text-lg text-cyan-300" />
-          {show && <a href="#" className="font-medium">User Pages</a>}
+          {show && (
+            <Link to="/user-pages" className="font-medium">
+              User Pages
+            </Link>
+          )}
         </div>
       </div>
     </div>

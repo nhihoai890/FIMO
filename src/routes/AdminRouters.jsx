@@ -13,6 +13,7 @@ import Booking from '../pages/admin/services/Booking/Booking';
 import Food from '../pages/admin/services/Food/Food';
 import Rooms from '../pages/admin/seating/Room/Rooms'
 import TypeChairs from '../pages/admin/seating/TypeChairs/TypeChairs';
+import UserPage from '../pages/admin/manager_user/UserPage';
 function AdminRouters(props) {
     const routers = [
         {
@@ -67,6 +68,11 @@ function AdminRouters(props) {
         {
             path: "/typechairs",
             element: <TypeChairs />
+        },
+
+        {
+            path: "/user-pages",
+            element: <UserPage />
         }
 
     ]   
