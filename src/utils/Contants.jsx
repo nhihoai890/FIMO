@@ -97,8 +97,8 @@ export const LISTMENU = [
             path: "/foods"
          },
          {
-            name: "Booking",
-            path: "/booking"
+            name: "Orders",
+            path: "/orders"
          },
       ]
    },

@@ -9,11 +9,11 @@ import MovieScreening from '../pages/admin/media_maganement/MovieScreening/Movie
 import Cinema from '../pages/admin/Location/Cinema/Cinema';
 import CinemaLocations from '../pages/admin/Location/CinemaLocations/CinemaLocations';
 import Cities from '../pages/admin/Location/Cities/Cities';
-import Booking from '../pages/admin/services/Booking/Booking';
 import Food from '../pages/admin/services/Food/Food';
 import Rooms from '../pages/admin/seating/Room/Rooms'
 import TypeChairs from '../pages/admin/seating/TypeChairs/TypeChairs';
 import UserPage from '../pages/admin/manager_user/UserPage';
+import Orders from '../pages/admin/services/orders/Orders';
 function AdminRouters(props) {
     const routers = [
         {
@@ -54,8 +54,8 @@ function AdminRouters(props) {
             element: <Cities />
         },
           {
-            path: "/booking",
-            element: <Booking />
+            path: "/orders",
+            element: <Orders />
         },
           {
             path: "/foods",
