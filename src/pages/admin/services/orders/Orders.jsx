@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import SearchAdmin from '../../../../components/admin/SearchAdmin';
 import TableOrders from './TableOrders';
+import ModalOrders from './ModalOrders';
 
 
 
@@ -16,7 +17,7 @@ function Orders(props) {
         <>
             <SearchAdmin title="List Orders" placeholder="Search Orders..." handleClickOpen={handleClickOpen} />
             <TableOrders />
-            
+            <ModalOrders open={open} handleClose={handleClose} />
         </>
 
     );
