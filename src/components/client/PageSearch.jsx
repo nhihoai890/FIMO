@@ -61,7 +61,6 @@ function PageSearch() {
             );
         })
     }, [search])
-    console.log(getSearchMovieScreen);
 
 
     const handleChangeInput = (e) => {

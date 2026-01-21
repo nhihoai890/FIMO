@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useMemo, useState } from "react";
 import {
     Dialog,
     DialogTitle,
@@ -13,6 +13,14 @@ import {
     Divider,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { CitiesContext } from "../../../../contexts/CitiesProvider";
+import { CinemaLocationsContext } from "../../../../contexts/CinemaLocationProvider";
+import { MoviesContext } from "../../../../contexts/MovieProvider";
+import { RoomsContext } from "../../../../contexts/RoomProvider";
+import { MovieScreeningContext } from "../../../../contexts/MovieScreeningProvider";
+import { getOjectById } from "../../../../utils/functionContants";
+import { minVelocity } from "@tsparticles/engine";
+import ShowRoomBooking from "../../../client/booking/ShowRoomBooking";
 
 /* ================= TRANSITION ================= */
 
@@ -80,8 +88,52 @@ const NeonButton = styled(Button)(() => ({
 }));
 
 /* ================= COMPONENT ================= */
-
+const inner = {idCity: "", idCinemaLocation:"", idMovie:"", idMovieScreen:"", idRoom: ""}
 function ModalOrders({ open, handleClose }) {
+    const cities = useContext(CitiesContext);
+    const cinemaLocations = useContext(CinemaLocationsContext);
+    const movies = useContext(MoviesContext);
+    const rooms = useContext(RoomsContext);
+    const movieScreens = useContext(MovieScreeningContext);
+
+    const [booking, setBooking] = useState(inner);
+    const cinemaOptions = useMemo(() => {
+        return cinemaLocations.filter(ct => ct.idCity === booking.idCity)
+    },[booking, cinemaLocations])
+
+ const getMoviesWithUpcomingShowtimes = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const next7Days = new Date(now);
+    next7Days.setDate(now.getDate() + 7);
+
+    const movieIds = new Set(
+        movieScreens
+            .filter(st => {
+                const showDate = new Date(st.release_date);
+                showDate.setHours(0, 0, 0, 0);
+                return showDate >= now && showDate <= next7Days && st.idCinemaLocation === booking.idCinemaLocation;
+            })
+            .map(st => st.idMovie)
+    );
+
+    return movies.filter(movie => movieIds.has(movie.id));
+ },[movies, movieScreens, booking])
+
+ const movieScreenOption = useMemo(() => {
+      return movieScreens.filter(mv => mv.idCinemaLocation === booking.idCinemaLocation && mv.idMovie === booking.idMovie)
+ },[movieScreens, booking])
+    console.log(movieScreenOption);
+
+    const dataRoom = useMemo(() => {
+        return getOjectById(rooms, getOjectById(movieScreens, booking.idMovieScreen)?.idRoom)
+    }, [rooms, booking])
+    
+    const showImgUrl = (e) => {
+        return "hello"
+    }
+
     return (
         <CyberDialog
             open={open}
@@ -103,41 +155,54 @@ function ModalOrders({ open, handleClose }) {
                     {/* LEFT – FORM */}
                     <Box sx={{ display: "grid", gap: 2.5 }}>
                         <Autocomplete
-                            options={["Avatar", "Dune", "Oppenheimer"]}
+                            options={cities}
+                            value={getOjectById(cities, booking.idCity)}
+                            onChange={(e, value) => setBooking({...booking, idCity: value.id})}
+                            getOptionLabel={(option) => option?.name || ""}
                             renderInput={(params) => (
-                                <CyberTextField {...params} label="🎬 Phim" />
+                                <CyberTextField {...params} label="Thành Phố" />
                             )}
                         />
 
                         <Autocomplete
-                            options={["Hà Nội", "TP.HCM", "Đà Nẵng"]}
+                            options={cinemaOptions}
+                            value={getOjectById(cinemaLocations, booking.idCinemaLocation)}
+                            onChange={(e, value) => setBooking({...booking, idCinemaLocation: value.id}) }
+                            getOptionLabel={(option) => option?.name || ""}
                             renderInput={(params) => (
-                                <CyberTextField {...params} label="🌆 Thành phố" />
+                                <CyberTextField {...params} label="Rạp" />
                             )}
                         />
 
                         <Autocomplete
-                            options={["CGV Vincom", "Lotte Cinema", "Galaxy"]}
+                            options={getMoviesWithUpcomingShowtimes}
+                            value={getOjectById(movies, booking.idMovie)}
+                            onChange={(e, value) => setBooking({...booking, idMovie: value.id})}
+                            getOptionLabel={(option) => option?.name || ""}
                             renderInput={(params) => (
-                                <CyberTextField {...params} label="🏢 Rạp" />
+                                <CyberTextField {...params} label="Phim" />
                             )}
                         />
 
                         <Autocomplete
-                            options={["14:00", "16:30", "19:00", "21:45"]}
+                            options={movieScreenOption}
+                            getOptionLabel={(option) => option?.release_date}
+                           onChange={(e, value) => setBooking({...booking, idMovieScreen: value.id})}
                             renderInput={(params) => (
                                 <CyberTextField {...params} label="⏰ Suất chiếu" />
                             )}
                         />
 
                         <Autocomplete
-                            options={["Phòng 1", "IMAX", "VIP"]}
+                            options={getOjectById(movieScreens, booking.idMovieScreen).list_showtime}
                             renderInput={(params) => (
-                                <CyberTextField {...params} label="🎥 Phòng chiếu" />
+                                <CyberTextField {...params} label="Gio Chieu" />
                             )}
                         />
                     </Box>
-
+                     <Box>
+                        <ShowRoomBooking data={dataRoom} showImgUrl={showImgUrl}/>
+                     </Box>
                     {/* RIGHT – ORDER INFO */}
                     <Box
                         sx={{
@@ -155,7 +220,7 @@ function ModalOrders({ open, handleClose }) {
                                 letterSpacing: 1,
                             }}
                         >
-                            THÔNG TIN ĐƠN HÀNG
+                           
                         </Box>
 
                         <Box sx={{ fontSize: 14, lineHeight: 2 }}>
@@ -188,6 +253,7 @@ function ModalOrders({ open, handleClose }) {
                             <span style={{ color: "#ff5cf4" }}>240.000đ</span>
                         </Box>
                     </Box>
+                    
                 </Box>
             </DialogContent>
 
@@ -198,7 +264,7 @@ function ModalOrders({ open, handleClose }) {
                 >
                     Hủy
                 </Button>
-                <NeonButton>Thanh toán</NeonButton>
+                <NeonButton>Xác nhận</NeonButton>
             </DialogActions>
         </CyberDialog>
     );
