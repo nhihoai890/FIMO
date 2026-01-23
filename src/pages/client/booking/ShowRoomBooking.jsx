@@ -93,7 +93,6 @@ function ShowRoomBooking({ data, handleBooking, showImgUrl }) {
                     const rowIndex = Math.floor(index / data.columns);
                     const colIndex = index % data.columns;
                     const key = `${rowIndex}-${colIndex}`;
-                    console.log(e);
                     return (
                         <Box key={key} sx={{ position: 'relative' }} onClick={() => handleBooking(e)}>
                             <img

@@ -80,7 +80,7 @@ function AdminRouters(props) {
         <div>
             <Routes>
                  {routers.map(e => (
-                    <Route  path={e.path} element={e.element} />
+                    <Route key={e.path}  path={e.path} element={e.element} />
                  ))}
             </Routes>
         </div>

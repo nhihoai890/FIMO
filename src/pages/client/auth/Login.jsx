@@ -73,8 +73,8 @@ function Login({ open, handleClose, handleClickOpenRegister }) {
                     email : user.email
                 };
 
-                await addDocument('accounts', newCustomer);
-                loggedInCustomer = newCustomer;
+             const newAccount =  await addDocument('accounts', newCustomer);
+                loggedInCustomer = newAccount;
             } else {
                 loggedInCustomer = existingCustomer;
             }

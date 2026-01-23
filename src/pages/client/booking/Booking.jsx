@@ -16,6 +16,7 @@ import seat from "../../../assets/seat.png"
 import { BookingContext } from '../../../contexts/BookingProvider';
 import { TypeChairsContext } from '../../../contexts/TypeChairProvider';
 import { CinemaLocationsContext } from '../../../contexts/CinemaLocationProvider';
+import { OrdersContenxt } from '../../../contexts/OrdersProvider';
 
 function Booking() {
     const { id, showtime } = useParams();
@@ -23,6 +24,7 @@ function Booking() {
     const movies = useContext(MoviesContext);
     const rooms = useContext(RoomsContext);
     const typeChairs = useContext(TypeChairsContext);
+    const orders = useContext(OrdersContenxt);
     // bookings
     const bookings = useContext(BookingContext);
     const movieScreens = useContext(MovieScreeningContext);
@@ -49,16 +51,19 @@ function Booking() {
                 await updateDocument("bookings", oldBooking);
             }
         } else {
-            const newBooking = { idMovieScreening: id, idAccount: isLogin.id, time: showtime, listChair: [value] };
+            const newBooking = { idMovieScreening: id, idAccount: isLogin?.id, time: showtime, listChair: [value] };
+            console.log(newBooking);
+
             await addDocument("bookings", newBooking);
         }
 
     }
 
     const showImgUrl = (value) => {
+        const checkOrder = orders.some(e => e.idMovieScreening == id && e.timeMovieScreen == showtime && e.listchair.some(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair))
         const check = bookings.some(e => e.idMovieScreening == id && e.idAccount == isLogin?.id && e.time == showtime
             && e.listChair.some(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair));
-        return check ? selected : getOjectById(typeChairs, value.idChair)?.imgUrl;
+        return checkOrder ? seat : check ? selected : getOjectById(typeChairs, value.idChair)?.imgUrl;
     }
 
     const selectBooking = useMemo(() => {
