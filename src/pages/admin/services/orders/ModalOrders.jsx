@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
     Dialog,
     DialogTitle,
@@ -20,13 +20,15 @@ import { RoomsContext } from "../../../../contexts/RoomProvider";
 import { MovieScreeningContext } from "../../../../contexts/MovieScreeningProvider";
 import { getOjectById } from "../../../../utils/functionContants";
 import ShowRoomBooking from "../../../client/booking/ShowRoomBooking";
-import ModalFoodOrders from "./ModalFoodOrders";
 import CustomizedSteppers from "./CustomizedSteppers";
 import { BookingContext } from "../../../../contexts/BookingProvider";
 import { TypeChairsContext } from "../../../../contexts/TypeChairProvider";
 import selected from "../../../../assets/seatSelected.png"
 import seat from "../../../../assets/seat.png"
 import { OrdersContenxt } from "../../../../contexts/OrdersProvider";
+import StepBooking from "./StepBooking";
+import StepOrderFood from "./StepOrderFood";
+import { FoodsContext } from "../../../../contexts/FoodProvider";
 
 /* ================= TRANSITION ================= */
 
@@ -94,7 +96,7 @@ const NeonButton = styled(Button)(() => ({
 }));
 
 /* ================= COMPONENT ================= */
-const inner = { idCity: "", idCinemaLocation: "", idMovie: "", idMovieScreen: "", idRoom: "", time: ""}
+const inner = { idCity: "", idCinemaLocation: "", idMovie: "", idMovieScreen: "", idRoom: "", time: "" }
 function ModalOrders({ open, handleClose }) {
     const cities = useContext(CitiesContext);
     const cinemaLocations = useContext(CinemaLocationsContext);
@@ -103,9 +105,17 @@ function ModalOrders({ open, handleClose }) {
     const movieScreens = useContext(MovieScreeningContext);
     const bookings = useContext(BookingContext);
     const typeChairs = useContext(TypeChairsContext);
+    const foods = useContext(FoodsContext);
     const orders = useContext(OrdersContenxt);
     const [booking, setBooking] = useState(inner);
-    const [openFood, setOpenFood] = useState(false)
+    const [activeStep, setActiveStep] = useState(0);
+
+    useEffect(() => {
+        if (!open) {
+            setActiveStep(0);
+            setBooking(inner);
+        }
+    }, [open]);
     const cinemaOptions = useMemo(() => {
         return cinemaLocations.filter(ct => ct.idCity === booking.idCity)
     }, [booking, cinemaLocations])
@@ -139,21 +149,28 @@ function ModalOrders({ open, handleClose }) {
         return getOjectById(rooms, getOjectById(movieScreens, booking.idMovieScreen)?.idRoom)
     }, [rooms, booking])
 
-   const showImgUrl = (value) => {
-    const checkOrder = orders.some(e => e.idMovieScreening == booking.idMovieScreen && e.timeMovieScreen == booking.time && e.listchair.some(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair) )
-         const check = bookings.some(e => e.idMovieScreening == booking.idMovieScreen && e.time == booking.time
-             && e.listChair.some(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair));
-         return checkOrder? seat : check ? "https://cdn-icons-png.flaticon.com/128/7306/7306270.png" : getOjectById(typeChairs, value.idChair)?.imgUrl;
-     }
- 
-    const closeModal = () => {
-        setOpenFood(false);
-        setBooking(inner);
-        handleClose();
+    const showImgUrl = (value) => {
+        const checkOrder = orders.some(e => e.idMovieScreening == booking.idMovieScreen && e.timeMovieScreen == booking.time && e.listchair.some(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair))
+        const check = bookings.some(e => e.idMovieScreening == booking.idMovieScreen && e.time == booking.time
+            && e.listChair.some(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair));
+        return checkOrder ? seat : check ? "https://cdn-icons-png.flaticon.com/128/7306/7306270.png" : getOjectById(typeChairs, value.idChair)?.imgUrl;
     }
 
+    const canGoNextFromBooking = Boolean(
+        booking.idCity &&
+        booking.idCinemaLocation &&
+        booking.idMovie &&
+        booking.idMovieScreen &&
+        booking.time
+    );
+    const handleBack = () => {
+        if (activeStep === 0) handleClose();
+        else setActiveStep((s) => s - 1);
+    };
+
     const handleNext = () => {
-        setOpenFood(true);
+        if(activeStep === 0 && !canGoNextFromBooking) return;
+        setActiveStep((s) => Math.min(s + 1, 2))
     }
 
     return (
@@ -168,134 +185,39 @@ function ModalOrders({ open, handleClose }) {
                 <CyberTitle>ĐẶT VÉ TẠI QUẦY</CyberTitle>
 
                 <DialogContent sx={{ mt: 3 }}>
-                    <CustomizedSteppers />
-                    <Box
-                        sx={{
-                            display: "grid",
-                            gridTemplateColumns: "1fr 1fr",
-                            gap: 3,
-                            mt: 3,
-                        }}
-                    >
-                        {/* LEFT – FORM */}
-                        <Box sx={{ display: "grid", gap: 2.5 }}>
-                            <Autocomplete
-                                options={cities}
-                                value={getOjectById(cities, booking.idCity)}
-                                onChange={(e, value) => setBooking({ ...booking, idCity: value.id })}
-                                getOptionLabel={(option) => option?.name || ""}
-                                renderInput={(params) => (
-                                    <CyberTextField {...params} label="Thành Phố" />
-                                )}
-                            />
-
-                            <Autocomplete
-                                options={cinemaOptions}
-                                value={getOjectById(cinemaLocations, booking.idCinemaLocation)}
-                                onChange={(e, value) => setBooking({ ...booking, idCinemaLocation: value.id })}
-                                getOptionLabel={(option) => option?.name || ""}
-                                renderInput={(params) => (
-                                    <CyberTextField {...params} label="Rạp" />
-                                )}
-                            />
-
-                            <Autocomplete
-                                options={getMoviesWithUpcomingShowtimes}
-                                value={getOjectById(movies, booking.idMovie)}
-                                onChange={(e, value) => setBooking({ ...booking, idMovie: value.id })}
-                                getOptionLabel={(option) => option?.name || ""}
-                                renderInput={(params) => (
-                                    <CyberTextField {...params} label="Phim" />
-                                )}
-                            />
-
-                            <Autocomplete
-                                options={movieScreenOption}
-                                getOptionLabel={(option) => option?.release_date}
-                                onChange={(e, value) => setBooking({ ...booking, idMovieScreen: value.id })}
-                                renderInput={(params) => (
-                                    <CyberTextField {...params} label="⏰ Suất chiếu" />
-                                )}
-                            />
-
-                            <Autocomplete
-                                options={getOjectById(movieScreens, booking.idMovieScreen).list_showtime}
-                                onChange={(e,value) =>setBooking({...booking, time: value}) }
-                                renderInput={(params) => (
-                                    <CyberTextField {...params} label="Gio Chieu" />
-                                )}
-                            />
-                        </Box>
-                        <Box>
-                            {booking.time &&  <ShowRoomBooking data={dataRoom} showImgUrl={showImgUrl} /> }
-                           
-                        </Box>
-                        {/* RIGHT – ORDER INFO */}
-                        {/* <Box
-                        sx={{
-                            border: "1px solid rgba(0,255,255,0.3)",
-                            borderRadius: 3,
-                            p: 2.5,
-                            background: "#0c0c18",
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                color: "#00ffff",
-                                fontWeight: 700,
-                                mb: 2,
-                                letterSpacing: 1,
-                            }}
-                        >
-                           
-                        </Box>
-
-                        <Box sx={{ fontSize: 14, lineHeight: 2 }}>
-                            <p>🎬 Phim: <b>Avatar</b></p>
-                            <p>🏢 Rạp: <b>CGV Vincom</b></p>
-                            <p>⏰ Suất: <b>19:00</b></p>
-                            <p>🎥 Phòng: <b>IMAX</b></p>
-                        </Box>
-
-                        <Divider sx={{ my: 2, borderColor: "rgba(0,255,255,0.2)" }} />
-
-                        <Box sx={{ mb: 1 }}>🎟 Ghế đã chọn</Box>
-                        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                            <Chip label="A1" color="error" />
-                            <Chip label="A2" color="error" />
-                            <Chip label="A3" color="error" />
-                        </Box>
-
-                        <Divider sx={{ my: 2, borderColor: "rgba(0,255,255,0.2)" }} />
-
-                        <Box
-                            sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                fontWeight: 700,
-                                fontSize: 16,
-                            }}
-                        >
-                            <span>TỔNG TIỀN</span>
-                            <span style={{ color: "#ff5cf4" }}>240.000đ</span>
-                        </Box>
-                    </Box> */}
-
-                    </Box>
+                    <CustomizedSteppers activeStep={activeStep} />
+                    {
+                        activeStep === 0 &&
+                        <StepBooking cities={cities}
+                            cinemaLocations={cinemaLocations}
+                            movies={movies}
+                            movieScreens={movieScreens}
+                            rooms={rooms}
+                            booking={booking}
+                            setBooking={setBooking}
+                            cinemaOptions={cinemaOptions}
+                            getMoviesWithUpcomingShowtimes={getMoviesWithUpcomingShowtimes}
+                            movieScreenOption={movieScreenOption}
+                            dataRoom={dataRoom}
+                            showImgUrl={showImgUrl}
+                            CyberTextField={CyberTextField} />
+                    }
+                    {
+                        activeStep === 1 && <StepOrderFood />
+                    }
                 </DialogContent>
 
                 <DialogActions sx={{ px: 3, pb: 3, justifyContent: "space-between" }}>
                     <Button
-                        onClick={closeModal}
+                        onClick={handleBack}
                         sx={{ color: "#FF6B6B", fontWeight: 600 }}
                     >
-                        Hủy
+                       {activeStep === 0 ? "Hủy" : "Quay lại"}
                     </Button>
-                    <NeonButton onClick={handleNext}>Tiếp Tục</NeonButton>
+                    <NeonButton onClick={handleNext}  disabled={activeStep === 0 ? !canGoNextFromBooking : false} > {activeStep === 2 ? "Thanh toán" : "Tiếp tục"}</NeonButton>
                 </DialogActions>
             </CyberDialog>
-            <ModalFoodOrders open={openFood} booking={booking} onBack={() => setOpenFood(false)}
-                onClose={() => setOpenFood(false)} />
+
         </>
     );
 }
