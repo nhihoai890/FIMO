@@ -3,7 +3,6 @@ import { CiImageOn } from "react-icons/ci";
 import { FaBowlFood } from "react-icons/fa6";
 import { IoLocationSharp } from "react-icons/io5";
 import { MdDashboard, MdEventSeat, MdGroup } from "react-icons/md";
-import { RiFolderUserFill } from "react-icons/ri";
 
 export const LISTMENU = [
    {
@@ -12,12 +11,7 @@ export const LISTMENU = [
       icon: <MdDashboard />,
       items: []
    },
-   {
-      name: "User Pages",
-      path: "/user-pages",
-      icon: <RiFolderUserFill />,
-      items: []
-   },
+   
 
    {
       name: "Categories",
