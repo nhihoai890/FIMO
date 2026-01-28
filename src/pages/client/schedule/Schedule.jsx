@@ -3,6 +3,7 @@ import { CitiesContext } from "../../../contexts/CitiesProvider";
 import { CinemaLocationsContext } from "../../../contexts/CinemaLocationProvider";
 import { MoviesContext } from "../../../contexts/MovieProvider";
 import { MovieScreeningContext } from "../../../contexts/MovieScreeningProvider";
+import { Link } from "react-router-dom";
 
 function Schedule() {
   const cities = useContext(CitiesContext);
@@ -47,7 +48,7 @@ function Schedule() {
       .filter((s) => s.idCinemaLocation === activeCinemaLocationId)
       .map((s) => s.release_date);
 
-    return [...new Set(list)];
+    return [...new Set(list)].sort((a, b) => new Date(a) - new Date(b));
   }, [movieScreens, activeCinemaLocationId]);
 
   const screens = useMemo(() => {
@@ -75,14 +76,17 @@ function Schedule() {
           times: [],
         };
       }
+      const showtimes = (screen.list_showtime || []).map((time) => ({
+         time,
+         movieScreenId : screen.id
+      }))
 
-      map[screen.idMovie].times.push(...screen.list_showtime);
+      map[screen.idMovie].times.push(...showtimes);
     });
 
     return Object.values(map);
   }, [screens, movies]);
 
-  /* ================= UI ================= */
   return (
     <div className="min-h-screen bg-[#0B0F14] text-gray-200 px-6 py-10">
       <h1 className="text-2xl font-bold text-center mb-8">
@@ -98,10 +102,9 @@ function Schedule() {
               key={city.id}
               onClick={() => setActiveCityId(city.id)}
               className={`w-full text-left px-3 py-2 rounded-lg mb-2
-                ${
-                  activeCityId === city.id
-                    ? "bg-blue-600 text-white"
-                    : "hover:bg-gray-700"
+                ${activeCityId === city.id
+                  ? "bg-blue-600 text-white"
+                  : "hover:bg-gray-700"
                 }`}
             >
               {city.name}
@@ -120,10 +123,9 @@ function Schedule() {
                 setActiveDate(null);
               }}
               className={`w-full text-left px-3 py-2 rounded-lg mb-2
-                ${
-                  activeCinemaLocationId === cinema.id
-                    ? "bg-blue-600 text-white"
-                    : "hover:bg-gray-700"
+                ${activeCinemaLocationId === cinema.id
+                  ? "bg-blue-600 text-white"
+                  : "hover:bg-gray-700"
                 }`}
             >
               {cinema.name}
@@ -140,10 +142,9 @@ function Schedule() {
                 key={date}
                 onClick={() => setActiveDate(date)}
                 className={`px-4 py-2 rounded-lg border
-                  ${
-                    activeDate === date
-                      ? "bg-blue-600 border-blue-600 text-white"
-                      : "border-gray-600 hover:bg-gray-700"
+                  ${activeDate === date
+                    ? "bg-blue-600 border-blue-600 text-white"
+                    : "border-gray-600 hover:bg-gray-700"
                   }`}
               >
                 {date}
@@ -156,25 +157,32 @@ function Schedule() {
             {scheduleMovies.map((movie) => (
               <div
                 key={movie.id}
-                className="bg-[#111827] rounded-xl p-5"
+                className="bg-[#111827] rounded-xl flex gap-5 p-5"
               >
-                <h3 className="text-lg font-semibold mb-1">
-                  {movie.title}
-                </h3>
-                <p className="text-sm text-gray-400 mb-4">
-                  {movie.duration} phút • {movie.ageLimit}
-                </p>
+                <img src={movie?.imgUrl} alt="" className="w-24 h-36 object-cover rounded-lg flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold mb-1">
+                    {movie.title}
+                  </h3>
+                  <p className="text-sm text-gray-400 mb-4">
+                    {movie.duration} phút • {movie.ageLimit}
+                  </p>
 
-                <div className="flex flex-wrap gap-3">
-                  {movie.times.map((time, idx) => (
-                    <button
-                      key={idx}
-                      className="px-4 py-2 rounded-lg border border-blue-500
-                      text-blue-400 hover:bg-blue-500 hover:text-white transition"
-                    >
-                      {time}
-                    </button>
-                  ))}
+                  <div className="flex flex-wrap gap-3">
+                    {movie.times.map((t, idx) => (
+                      <Link
+                        key={idx}
+                        to={`/booking/${t.movieScreenId}/${t.time}`}
+                      >
+                        <button
+                          className="px-4 py-2 rounded-lg border cursor-pointer border-blue-500
+                text-blue-400 hover:bg-blue-500 hover:text-white transition"
+                        >
+                          {t.time}
+                        </button>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}

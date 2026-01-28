@@ -134,15 +134,15 @@ function PageSearch() {
                 />
 
                 {/* BUTTON */}
-                <Link to={`/booking/${search.movieScreenId}/${search.time}`}>
-                    <Button
-                        variant="contained"
-                        className="!bg-gradient-to-r !from-purple-500 !to-blue-500 
-                               !text-white !font-semibold !rounded-xl !shadow-lg hover:opacity-90"
-                    >
-                        Mua vé nhanh
-                    </Button>
-                </Link>
+                <Button
+                    component={Link}
+                    to={`/booking/${search.movieScreenId}/${search.time}`}
+                    variant="contained"
+                    className="!bg-gradient-to-r !from-purple-500 !to-blue-500
+               !text-white !font-semibold !rounded-xl !shadow-lg hover:opacity-90"
+                >
+                    Mua vé nhanh
+                </Button>
 
             </div>
         </div>

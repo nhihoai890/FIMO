@@ -22,7 +22,6 @@ function Cinema() {
 
 
 
-
   useEffect(() => {
     setKeyword("");
   }, [city]);
