@@ -27,15 +27,7 @@ function Schedule() {
     setActiveDate(null);
   }, [activeCityId, cinemaLocations]);
 
-  useEffect(() => {
-    if (!activeCinemaLocationId) return;
 
-    const screens = movieScreens.filter(
-      (s) => s.idCinemaLocation === activeCinemaLocationId
-    );
-
-    setActiveDate(screens[0]?.release_date || null);
-  }, [activeCinemaLocationId, movieScreens]);
 
   const cinemas = useMemo(() => {
     return cinemaLocations.filter(
@@ -44,13 +36,26 @@ function Schedule() {
   }, [cinemaLocations, activeCityId]);
 
   const dates = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const list = movieScreens
-      .filter((s) => s.idCinemaLocation === activeCinemaLocationId)
+      .filter((s) => s.idCinemaLocation === activeCinemaLocationId && new Date(s.release_date) >= today)
       .map((s) => s.release_date);
 
     return [...new Set(list)].sort((a, b) => new Date(a) - new Date(b));
   }, [movieScreens, activeCinemaLocationId]);
 
+  useEffect(() => {
+    if (!dates.length) {
+      setActiveDate(null);
+      return;
+    }
+
+    if (!dates.includes(activeDate)) {
+      setActiveDate(dates[0]);
+    }
+  }, [dates, activeDate]);
   const screens = useMemo(() => {
     return movieScreens.filter(
       (s) =>
@@ -77,8 +82,8 @@ function Schedule() {
         };
       }
       const showtimes = (screen.list_showtime || []).map((time) => ({
-         time,
-         movieScreenId : screen.id
+        time,
+        movieScreenId: screen.id
       }))
 
       map[screen.idMovie].times.push(...showtimes);
