@@ -1,8 +1,14 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Box, Autocomplete } from "@mui/material";
 import ShowRoomBooking from "../../../client/booking/ShowRoomBooking";
 import { getOjectById } from "../../../../utils/functionContants";
 
+const toDateTime = (dateStr, timeStr) => {
+  const [y, m , d] = dateStr.split("-").map(Number);
+  const [hh, mm] = timeStr.split(":").map(Number);
+
+  return new Date(y, m-1, d, hh, mm);
+}
 export default function StepBooking({
   cities,
   cinemaLocations,
@@ -17,8 +23,22 @@ export default function StepBooking({
   dataRoom,
   showImgUrl,
   CyberTextField,
+  handleBooking
 }) {
+  const selectMovieScreen = getOjectById(movieScreens, booking.idMovieScreening);
+
+  const filteredShowtimes = useMemo(() => {
+    if(!selectMovieScreen) return;
+
+    const now = new Date();
+
+    return (selectMovieScreen.list_showtime || []).filter((time) => {
+       const showTime = toDateTime(selectMovieScreen.release_date, time);
+       return showTime > now;
+    })
+  }, [selectMovieScreen])
   return (
+    
     <Box
       sx={{
         display: "grid",
@@ -70,30 +90,30 @@ export default function StepBooking({
 
         <Autocomplete
           options={movieScreenOption}
-          value={getOjectById(movieScreens, booking.idMovieScreen)}
+          value={getOjectById(movieScreens, booking.idMovieScreening)}
           getOptionLabel={(option) => option?.release_date || ""}
           onChange={(e, value) =>
             setBooking({
               ...booking,
-              idMovieScreen: value?.id || "",
-              time: "",
+              idMovieScreening: value?.id || "",
+              timeMovieScreen: "",
             })
           }
           renderInput={(params) => <CyberTextField {...params} label="⏰ Suất chiếu" />}
         />
 
         <Autocomplete
-          options={getOjectById(movieScreens, booking.idMovieScreen)?.list_showtime || []}
-          value={booking.time || null}
-          onChange={(e, value) => setBooking({ ...booking, time: value || "" })}
+          options={filteredShowtimes}
+          value={booking.timeMovieScreen || null}
+          onChange={(e, value) => setBooking({ ...booking, timeMovieScreen: value || "" })}
           renderInput={(params) => <CyberTextField {...params} label="Giờ Chiếu" />}
         />
       </Box>
 
       {/* RIGHT – SEAT */}
       <Box>
-        {booking.time ? (
-          <ShowRoomBooking data={dataRoom} showImgUrl={showImgUrl} />
+        {booking.timeMovieScreen ? (
+          <ShowRoomBooking data={dataRoom} showImgUrl={showImgUrl} handleBooking={handleBooking} />
         ) : null}
       </Box>
     </Box>

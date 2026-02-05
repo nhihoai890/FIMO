@@ -19,16 +19,16 @@ import { MoviesContext } from "../../../../contexts/MovieProvider";
 import { RoomsContext } from "../../../../contexts/RoomProvider";
 import { MovieScreeningContext } from "../../../../contexts/MovieScreeningProvider";
 import { getOjectById } from "../../../../utils/functionContants";
-import ShowRoomBooking from "../../../client/booking/ShowRoomBooking";
 import CustomizedSteppers from "./CustomizedSteppers";
 import { BookingContext } from "../../../../contexts/BookingProvider";
 import { TypeChairsContext } from "../../../../contexts/TypeChairProvider";
-import selected from "../../../../assets/seatSelected.png"
 import seat from "../../../../assets/seat.png"
 import { OrdersContenxt } from "../../../../contexts/OrdersProvider";
 import StepBooking from "./StepBooking";
 import StepOrderFood from "./StepOrderFood";
 import { FoodsContext } from "../../../../contexts/FoodProvider";
+import { addDocument, updateDocument } from "../../../../services/firebaseService";
+import StepPayment from "./StepPayment";
 
 /* ================= TRANSITION ================= */
 
@@ -96,7 +96,7 @@ const NeonButton = styled(Button)(() => ({
 }));
 
 /* ================= COMPONENT ================= */
-const inner = { idCity: "", idCinemaLocation: "", idMovie: "", idMovieScreen: "", idRoom: "", time: "" }
+const inner = { idCity: "", idCinemaLocation: "", idMovie: "", idMovieScreening: "", idRoom: "", timeMovieScreen: "", listchair: [], idAccount: "booking tai quay", createAt: new Date(), method:"booking tai quay" }
 function ModalOrders({ open, handleClose }) {
     const cities = useContext(CitiesContext);
     const cinemaLocations = useContext(CinemaLocationsContext);
@@ -109,6 +109,7 @@ function ModalOrders({ open, handleClose }) {
     const orders = useContext(OrdersContenxt);
     const [booking, setBooking] = useState(inner);
     const [activeStep, setActiveStep] = useState(0);
+    const [orderItem, setOrderItem] = useState([]);
 
     useEffect(() => {
         if (!open) {
@@ -143,36 +144,114 @@ function ModalOrders({ open, handleClose }) {
     const movieScreenOption = useMemo(() => {
         return movieScreens.filter(mv => mv.idCinemaLocation === booking.idCinemaLocation && mv.idMovie === booking.idMovie)
     }, [movieScreens, booking])
-    console.log(movieScreenOption);
 
     const dataRoom = useMemo(() => {
-        return getOjectById(rooms, getOjectById(movieScreens, booking.idMovieScreen)?.idRoom)
+        return getOjectById(rooms, getOjectById(movieScreens, booking.idMovieScreening)?.idRoom)
     }, [rooms, booking])
 
     const showImgUrl = (value) => {
-        const checkOrder = orders.some(e => e.idMovieScreening == booking.idMovieScreen && e.timeMovieScreen == booking.time && e.listchair.some(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair))
-        const check = bookings.some(e => e.idMovieScreening == booking.idMovieScreen && e.time == booking.time
-            && e.listChair.some(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair));
-        return checkOrder ? seat : check ? "https://cdn-icons-png.flaticon.com/128/7306/7306270.png" : getOjectById(typeChairs, value.idChair)?.imgUrl;
-    }
+        console.log(booking.timeMovieScreen);
+        
+        const checkOrder = orders.some(
+            e =>
+                e.idMovieScreening == booking.idMovieScreening &&
+                e.timeMovieScreen == booking.timeMovieScreen &&
+                (e.listchair || e.listchair || []).some(
+                    c => c.row == value.row && c.col == value.col && c.idChair == value.idChair
+                )
+        );
+
+
+        const checkSelected = (booking.listchair || []).some(
+            c => c.row == value.row && c.col == value.col && c.idChair == value.idChair
+        );
+
+        return checkOrder
+            ? seat
+            : checkSelected
+                ? "https://cdn-icons-png.flaticon.com/128/7306/7306270.png"
+                : getOjectById(typeChairs, value.idChair)?.imgUrl;
+    };
+
+    const handleBooking = async (value) => {
+        const sameChair = (c) =>
+            c.row == value.row && c.col == value.col && c.idChair == value.idChair;
+
+        const existed = (booking.listchair || []).some(sameChair);
+
+        const newListChair = existed
+            ? (booking.listchair || []).filter((c) => !sameChair(c))
+            : [...(booking.listchair || []), value];
+
+        const updatedLocal = { ...booking, listchair: newListChair };
+        setBooking(updatedLocal);
+
+
+        if (updatedLocal.id) await updateDocument("bookings", updatedLocal);
+        else {
+            const created = await addDocument("bookings", updatedLocal);
+            setBooking(created || updatedLocal);
+        }
+    };
+
+
 
     const canGoNextFromBooking = Boolean(
         booking.idCity &&
         booking.idCinemaLocation &&
         booking.idMovie &&
-        booking.idMovieScreen &&
-        booking.time
+        booking.idMovieScreening &&
+        booking.timeMovieScreen
     );
     const handleBack = () => {
         if (activeStep === 0) handleClose();
         else setActiveStep((s) => s - 1);
     };
 
-    const handleNext = () => {
-        if(activeStep === 0 && !canGoNextFromBooking) return;
-        setActiveStep((s) => Math.min(s + 1, 2))
-    }
+    const handleNext = async () => {
+        if (activeStep === 0) {
+            if (!canGoNextFromBooking) return;
 
+            if ((booking.listchair || []).length === 0) {
+                alert("Vui lòng chọn ít nhất 1 ghế");
+                return;
+            }
+        }
+
+        if (activeStep === 2) {
+            const orderNew = await addDocument("orders", {...booking, total: totalPrice});
+            const newFoods = orderItem?.map(({ id, ...rest }) => ({
+                ...rest,
+                id_order: orderNew.id,
+            }));
+            await Promise.all(newFoods.map((item) => addDocument("OrderDetails", item)));
+        }
+        setActiveStep((s) => Math.min(s + 1, 2));
+    };
+
+    
+        const totalChair = useMemo(() => {
+            if (!booking) return 0;
+    
+            return booking.listchair.reduce((total, chair) => {
+                const typeChair = getOjectById(typeChairs, chair.idChair);
+                const price = typeChair?.price || 0;
+                const ratio = getOjectById(movieScreens, booking.idMovieScreening)?.ratio || 1;
+                return total + price * ratio;
+            }, 0);
+        }, [booking, typeChairs, movieScreens]);
+    
+        const totalFood = useMemo(() => {
+            if (!orderItem.length) return 0;
+            return orderItem.reduce((total, item) => {
+                const food = getOjectById(foods, item.idFood);
+                const price = food?.price;
+                return total + price * item.quantity
+            }, 0)
+        }, [orderItem, foods])
+        const totalPrice = useMemo(() => {
+            return totalChair + totalFood;
+        }, [totalChair, totalFood]); 
     return (
         <>
             <CyberDialog
@@ -200,10 +279,15 @@ function ModalOrders({ open, handleClose }) {
                             movieScreenOption={movieScreenOption}
                             dataRoom={dataRoom}
                             showImgUrl={showImgUrl}
+                            handleBooking={handleBooking}
                             CyberTextField={CyberTextField} />
                     }
                     {
-                        activeStep === 1 && <StepOrderFood />
+                        activeStep === 1 && <StepOrderFood booking={booking} orderItem={orderItem} setOrderItem={setOrderItem} />
+                    }
+
+                    {
+                        activeStep === 2 && <StepPayment booking={booking} orderItem={orderItem} movies={movies} movieScreens={movieScreens} totalChair={totalChair} totalFood={totalFood} totalPrice={totalPrice} />
                     }
                 </DialogContent>
 
@@ -212,9 +296,11 @@ function ModalOrders({ open, handleClose }) {
                         onClick={handleBack}
                         sx={{ color: "#FF6B6B", fontWeight: 600 }}
                     >
-                       {activeStep === 0 ? "Hủy" : "Quay lại"}
+                        {activeStep === 0 ? "Hủy" : "Quay lại"}
                     </Button>
-                    <NeonButton onClick={handleNext}  disabled={activeStep === 0 ? !canGoNextFromBooking : false} > {activeStep === 2 ? "Thanh toán" : "Tiếp tục"}</NeonButton>
+
+
+                    <NeonButton onClick={handleNext} disabled={activeStep === 0 ? !canGoNextFromBooking : false} > {activeStep === 2 ? "Thanh toán" : "Tiếp tục"}</NeonButton>
                 </DialogActions>
             </CyberDialog>
 

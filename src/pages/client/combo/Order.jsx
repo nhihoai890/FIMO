@@ -94,7 +94,6 @@ function Order() {
             }
             await addDocument("itemFoods", itemFoods);
         }
-
     }
     /// ham tru khi quantity no bang 1 xoa luon di / neu tren 1 update tru  di 1 
     const minusFoodItem = async (food) => {

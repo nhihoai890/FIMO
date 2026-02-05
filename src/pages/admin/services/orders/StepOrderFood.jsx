@@ -1,8 +1,46 @@
 import { Box, Divider } from '@mui/material';
-import React from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { FiMinus, FiPlus } from 'react-icons/fi';
+import { FoodsContext } from '../../../../contexts/FoodProvider';
+import { filterById } from '../../../../utils/functionContants';
 
-function StepOrderFood(props) {
+
+function StepOrderFood({ booking, orderItem, setOrderItem }) {
+    const foods = useContext(FoodsContext);
+    const filterFood = useMemo(() => {
+        return filterById(foods, booking.idCinemaLocation, "idCinemaLocation")
+    }, [foods, booking]);
+
+    const addFoodItem = (food) => {
+        const listFood = [...orderItem]
+        const checkIndex = listFood.findIndex(s => s.idFood == food.id);
+        if (checkIndex != -1) {
+            listFood[checkIndex].quantity += 1;
+        } else {
+            listFood.push({ idFood: food.id, quantity: 1 })
+        }
+        setOrderItem(listFood)
+    }
+
+    const minusFoodItem = (food) => {
+        const listFood = [...orderItem];
+        const checkIndex = listFood.findIndex(e => e.idFood == food.id)
+        if (checkIndex != -1) {
+            if (listFood[checkIndex].quantity == 1) {
+                listFood.splice(checkIndex, 1)
+            } else {
+                listFood[checkIndex].quantity -= 1;
+            }
+        }
+        setOrderItem(listFood)
+    }
+
+    
+
+    const showQuantity = (food) => {
+        const foodItem = orderItem?.find(e => e.idFood === food.id);
+        return foodItem ? foodItem.quantity : 0;
+    }
     return (
         <div>
             <Box sx={{ mt: 3, color: "#E6F7FF" }}>
@@ -13,57 +51,60 @@ function StepOrderFood(props) {
 
                 <Box>
                     <div className="max-w-4xl mx-auto grid grid-cols-2 gap-3 ">
-                       
+                        {
+                            filterFood.map((f, index) => (
 
 
-                            
                                 <div
                                     // key={f.id}
                                     className="flex col-span-1 items-center bg-[#1a1a1a] rounded-xl p-4 shadow-lg"
                                 >
                                     {/* Image */}
                                     <div className="bg-white rounded-lg p-2 flex-shrink-0">
-                                        {/* <img
+                                        <img
                                             src={f.imgUrl}
                                             alt={f.name}
                                             className="h-20 w-20 object-contain"
-                                        /> */}
+                                        />
                                     </div>
 
                                     {/* Info */}
                                     <div className="flex-1 ml-4">
                                         <h3 className="text-lg font-bold text-orange-400">
-                                            {/* {f.name} */}
+                                            {f.name}
                                         </h3>
                                         <p className="text-orange-500 font-extrabold mt-1">
-                                            {/* {f.price.toLocaleString()} đ */}
+                                            {f.price.toLocaleString()} đ
                                         </p>
                                     </div>
 
                                     {/* Quantity */}
                                     <div className="flex items-center gap-3">
                                         <button
-                                            // onClick={() => minusFoodItem(f)}
+                                            onClick={() => minusFoodItem(f)}
                                             className={"w-9 h-9 rounded-md flex items-center justify-center transition border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white"}
                                         >
                                             <FiMinus />
                                         </button>
 
                                         <div className="w-10 h-9 flex items-center justify-center border border-orange-500 rounded-md font-semibold">
-                                            {/* {showQuantity(f)} */}
+                                            {showQuantity(f)}
                                         </div>
 
                                         <button
-                                            // onClick={() => addFoodItem(f)}
+                                            onClick={() => addFoodItem(f)}
                                             className="w-9 h-9 bg-orange-500 text-white rounded-md flex items-center justify-center hover:bg-orange-600 transition"
                                         >
                                             <FiPlus />
                                         </button>
                                     </div>
                                 </div>
-                            
-                        
+
+
+                            ))
+                        }
                     </div>
+
                 </Box>
             </Box>
         </div>

@@ -63,6 +63,13 @@ function TableOrders(props) {
     const handleClose = () => {
         setOpen(false)
     }
+
+    const coverName = (f) => {
+        if(f.idAccount.includes("booking tai quay")){
+            return "booking tai quay"
+        }
+        return  getOjectById(accounts, f.idAccount)?.name
+    }
     
     return (
         <div>
@@ -95,7 +102,7 @@ function TableOrders(props) {
                             <CyberRow key={f.id}>
                                 <CyberCell>{index + 1}</CyberCell>
                                 <CyberCell>
-                                    {getOjectById(accounts, f.idAccount)?.name}
+                                   {coverName(f)}
                                 </CyberCell>
                                 <CyberCell>{getOjectById(movies, getOjectById(moviescreens, f.idMovieScreening).idMovie).name}</CyberCell>
                                 <CyberCell sx={{ color: '#0ff' }}>{f.listchair.map(s => s.seatCode)}</CyberCell>
