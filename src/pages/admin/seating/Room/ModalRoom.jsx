@@ -87,18 +87,39 @@ function ModalRoom({ open, handleClose, room, handleInputRoom, error, setError }
 
     }
 
-
-
-
     const handleSelectType = (type) => {
         const { row, col, idChair } = selectSeat;
         const updateGrid = [...grid];
+        if (type.id == "Zz54Ux3eOaxsOucCXKhW") {
+            const colD = col % 2 == 0 ? col + 1 : col - 1;
+            if (updateGrid[row][colD].idChair != "" && updateGrid[row][colD].idChair != "Zz54Ux3eOaxsOucCXKhW" ) {
+                alert("khong the tao");
+                return;
+            }
 
-        updateGrid[row][col] = {
-            row: row,
-            col: col,
-            idChair: idChair == type.id ? "" : type.id || seat,
-        };
+            updateGrid[row][col] = {
+                row: row,
+                col: col,
+                idChair: idChair == type.id ? "" : type.id || seat,
+            };
+
+            updateGrid[row][colD] = {
+                row: row,
+                col: colD,
+                idChair: idChair == type.id ? "" : type.id || seat,
+            };
+        } else {
+            if (updateGrid[row][col].idChair == "Zz54Ux3eOaxsOucCXKhW") {
+                alert("khong the tao lai");
+                return;
+            }
+            updateGrid[row][col] = {
+                row: row,
+                col: col,
+                idChair: idChair == type.id ? "" : type.id || seat,
+            };
+        }
+
         setGrid(updateGrid);
         setChooseType(false);
     }

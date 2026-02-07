@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { OrdersContenxt } from '../../../../contexts/OrdersProvider';
 import { MovieScreeningContext } from '../../../../contexts/MovieScreeningProvider';
 import { AccountContext } from '../../../../contexts/AccountProvider';
@@ -16,6 +15,7 @@ import { styled } from '@mui/material/styles';
 import { MoviesContext } from '../../../../contexts/MovieProvider';
 import { LuNotebookPen } from 'react-icons/lu';
 import ModalDetail from './ModalDetail';
+import PaginationTablePage from '../../../../components/admin/PaginationTablePage';
 
 // ===== Styled components =====
 const CyberCell = styled(TableCell)(() => ({
@@ -55,9 +55,17 @@ function TableOrders(props) {
     const movies = useContext(MoviesContext);
     const [open, setOpen] = useState(false)
     const [order, setOrder] = useState(null)
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+
+    const handleChangePage = (event, newPage) => setPage(newPage);
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
     const handleClickOpen = (row) => {
-       setOrder(row);
-       setOpen(true);
+        setOrder(row);
+        setOpen(true);
     }
 
     const handleClose = () => {
@@ -65,12 +73,12 @@ function TableOrders(props) {
     }
 
     const coverName = (f) => {
-        if(f.idAccount.includes("booking tai quay")){
+        if (f.idAccount.includes("booking tai quay")) {
             return "booking tai quay"
         }
-        return  getOjectById(accounts, f.idAccount)?.name
+        return getOjectById(accounts, f.idAccount)?.name
     }
-    
+
     return (
         <div>
             <TableContainer
@@ -98,17 +106,20 @@ function TableOrders(props) {
                     </TableHead>
 
                     <TableBody>
-                        {orders.map((f, index) => (
+                        {orders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((f, index) => (
                             <CyberRow key={f.id}>
-                                <CyberCell>{index + 1}</CyberCell>
+                                <CyberCell>{page * rowsPerPage + index + 1}</CyberCell>
                                 <CyberCell>
-                                   {coverName(f)}
+                                    {coverName(f)}
                                 </CyberCell>
                                 <CyberCell>{getOjectById(movies, getOjectById(moviescreens, f.idMovieScreening).idMovie).name}</CyberCell>
-                                <CyberCell sx={{ color: '#0ff' }}>{f.listchair.map(s => s.seatCode)}</CyberCell>
+                                <CyberCell sx={{ color: '#0ff' }}>
+                                    {f.listchair?.map(s => s.seatCode).join(', ')}
+                                </CyberCell>
+
                                 <CyberCell sx={{ color: '#0ff' }}>{f.method}</CyberCell>
                                 <CyberCell sx={{ color: '#f39c12' }}>{f.timeMovieScreen} </CyberCell>
-                                <CyberCell sx={{ color: '#f39c12' }} >{f.total}</CyberCell>
+                                <CyberCell sx={{ color: '#f39c12' }} >{Number(f.total).toLocaleString("vi-VN")} đ</CyberCell>
                                 <CyberCell sx={{ color: '#f39c12' }} align='center' > <Button
                                     variant="contained"
                                     size="small"
@@ -130,10 +141,17 @@ function TableOrders(props) {
                         ))}
                     </TableBody>
                 </Table>
+                <PaginationTablePage
+                    data={orders}
+                    page={page}
+                    handleChangePage={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    handleChangeRowsPerPage={handleChangeRowsPerPage}
+                />
 
             </TableContainer>
 
-            <ModalDetail order={order} open={open} handleClose={handleClose}  />
+            <ModalDetail order={order} open={open && !!order} handleClose={handleClose} />
         </div>
     );
 }

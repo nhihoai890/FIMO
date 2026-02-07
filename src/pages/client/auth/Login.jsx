@@ -15,6 +15,7 @@ import { auth, googleProvider } from '../../../config/firebaseConfig';
 import { addDocument } from '../../../services/firebaseService';
 import { useNavigate } from 'react-router-dom';
 import { ROLES } from "../../../utils/Contants";
+import ForgotPassword from './ForgotPassword';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -27,6 +28,16 @@ function Login({ open, handleClose, handleClickOpenRegister }) {
     const showNotification = useNotification();
     const { loginContext } = useContext(AuthContext);
     const navigate = useNavigate();
+    const [openForgotPassword, setOpenForgotPassword] = useState(false);
+
+    const handleOpenForgotPassword = () => {
+        setOpenForgotPassword(true);
+    };
+
+    const handleCloseForgotPassword = () => {
+        setOpenForgotPassword(false);
+    };
+
     const handleChange = (e) => {
         setLogin({ ...login, [e.target.name]: e.target.value });
     };
@@ -59,7 +70,7 @@ function Login({ open, handleClose, handleClickOpenRegister }) {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             console.log(result);
-            
+
             const user = result.user;
             const existingCustomer = accounts.find(customer => customer.email === user.email);
             let loggedInCustomer;
@@ -70,10 +81,10 @@ function Login({ open, handleClose, handleClickOpenRegister }) {
                     name: user.displayName,
                     imgUrl: user.photoURL,
                     role: ROLES.USER,
-                    email : user.email
+                    email: user.email
                 };
 
-             const newAccount =  await addDocument('accounts', newCustomer);
+                const newAccount = await addDocument('accounts', newCustomer);
                 loggedInCustomer = newAccount;
             } else {
                 loggedInCustomer = existingCustomer;
@@ -87,156 +98,160 @@ function Login({ open, handleClose, handleClickOpenRegister }) {
         }
     };
     return (
-        <Dialog
-            open={open}
-            slots={{ transition: Transition }}
-            keepMounted
-            onClose={handleCloseModal}
-            PaperProps={{
-                sx: {
-                    borderRadius: "20px",
-                    background: "rgba(30,30,30,0.55)",
-                    backdropFilter: "blur(25px)",
-                    border: "1px solid rgba(255,255,255,0.15)",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                    width: { xs: "90vw", sm: "50vw" },
-                    p: 3,
-                    color: "white"
-                }
-            }}
-        >
-            <DialogTitle
-                sx={{
-                    textAlign: "center",
-                    fontSize: "28px",
-                    fontWeight: "800",
-                    background: "linear-gradient(to right, #ff2e63, #ff7f50, #ffd662)",
-                    WebkitBackgroundClip: "text",
-                    color: "transparent",
-                    mb: 2
+        <>
+            <Dialog
+                open={open}
+                slots={{ transition: Transition }}
+                keepMounted
+                onClose={handleCloseModal}
+                PaperProps={{
+                    sx: {
+                        borderRadius: "20px",
+                        background: "rgba(30,30,30,0.55)",
+                        backdropFilter: "blur(25px)",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                        width: { xs: "90vw", sm: "50vw" },
+                        p: 3,
+                        color: "white"
+                    }
                 }}
             >
-                LOGIN
-            </DialogTitle>
+                <DialogTitle
+                    sx={{
+                        textAlign: "center",
+                        fontSize: "28px",
+                        fontWeight: "800",
+                        background: "linear-gradient(to right, #ff2e63, #ff7f50, #ffd662)",
+                        WebkitBackgroundClip: "text",
+                        color: "transparent",
+                        mb: 2
+                    }}
+                >
+                    LOGIN
+                </DialogTitle>
 
-            <DialogContent>
-                <form>
-                    {/* Email */}
-                    <TextField
-                        fullWidth
-                        label="Email"
-                        name="email"
-                        value={login.email}
-                        onChange={handleChange}
-                        variant="outlined"
-                        size="small"
-                        sx={{
-                            mt: 1,
-                            mb: 3,
-                            "& .MuiOutlinedInput-root": {
+                <DialogContent>
+                    <form>
+                        {/* Email */}
+                        <TextField
+                            fullWidth
+                            label="Email"
+                            name="email"
+                            value={login.email}
+                            onChange={handleChange}
+                            variant="outlined"
+                            size="small"
+                            sx={{
+                                mt: 1,
+                                mb: 3,
+                                "& .MuiOutlinedInput-root": {
+                                    borderRadius: "12px",
+                                    background: "rgba(255,255,255,0.15)",
+                                    color: "white",
+                                    "& input": { color: "white" },
+                                    "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
+                                    "&:hover fieldset": { borderColor: "rgba(255,255,255,0.6)" }
+                                },
+                                "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.7)" }
+                            }}
+                        />
+
+                        {/* Password */}
+                        <TextField
+                            fullWidth
+                            label="Password"
+                            name="password"
+                            type="password"
+                            value={login.password}
+                            onChange={handleChange}
+                            variant="outlined"
+                            size="small"
+                            sx={{
+                                mb: 1,
+                                "& .MuiOutlinedInput-root": {
+                                    borderRadius: "12px",
+                                    background: "rgba(255,255,255,0.15)",
+                                    color: "white",
+                                    "& input": { color: "white" },
+                                    "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
+                                    "&:hover fieldset": { borderColor: "rgba(255,255,255,0.6)" }
+                                },
+                                "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.7)" }
+                            }}
+                        />
+
+                        {/* Forgot password */}
+                        <div className="text-right mb-3">
+                            <button
+                                onClick={handleOpenForgotPassword}
+                                type="button"
+                                className="text-blue-400 text-sm underline font-medium"
+                            >
+                                Quên mật khẩu?
+                            </button>
+                        </div>
+
+                        {/* Login button */}
+                        <Button
+                            fullWidth
+                            sx={{
+                                py: 1.5,
+                                mb: 2,
                                 borderRadius: "12px",
-                                background: "rgba(255,255,255,0.15)",
+                                fontSize: "16px",
+                                fontWeight: "700",
+                                background: "linear-gradient(to right, #ff2e63, #ff7f50, #ffd662)",
                                 color: "white",
-                                "& input": { color: "white" },
-                                "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                                "&:hover fieldset": { borderColor: "rgba(255,255,255,0.6)" }
-                            },
-                            "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.7)" }
-                        }}
-                    />
+                                boxShadow: "0 4px 14px rgba(255,100,140,0.4)",
+                                "&:hover": {
+                                    background: "linear-gradient(to right, #ff1e52, #ff6f40, #ffca52)"
+                                }
+                            }}
+                            onClick={handleLogin}
+                        >
+                            Login
+                        </Button>
 
-                    {/* Password */}
-                    <TextField
-                        fullWidth
-                        label="Password"
-                        name="password"
-                        type="password"
-                        value={login.password}
-                        onChange={handleChange}
-                        variant="outlined"
-                        size="small"
-                        sx={{
-                            mb: 1,
-                            "& .MuiOutlinedInput-root": {
+                        {/* Divider */}
+                        <Divider sx={{ my: 2, borderColor: "rgba(255,255,255,0.3)" }}>Or</Divider>
+
+                        {/* Login with Google */}
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            startIcon={<FcGoogle />}
+
+                            sx={{
+                                py: 1.5,
                                 borderRadius: "12px",
-                                background: "rgba(255,255,255,0.15)",
+                                textTransform: "none",
+                                fontWeight: 600,
+                                borderColor: "rgba(255,255,255,0.3)",
                                 color: "white",
-                                "& input": { color: "white" },
-                                "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                                "&:hover fieldset": { borderColor: "rgba(255,255,255,0.6)" }
-                            },
-                            "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.7)" }
-                        }}
-                    />
-
-                    {/* Forgot password */}
-                    <div className="text-right mb-3">
-                        <button
-                            type="button"
-                            className="text-blue-400 text-sm underline font-medium"
+                                "&:hover": { borderColor: "rgba(255,255,255,0.6)" }
+                            }}
+                            onClick={signInWithGoogle}
                         >
-                            Quên mật khẩu?
-                        </button>
-                    </div>
+                            Login with Google
+                        </Button>
 
-                    {/* Login button */}
-                    <Button
-                        fullWidth
-                        sx={{
-                            py: 1.5,
-                            mb: 2,
-                            borderRadius: "12px",
-                            fontSize: "16px",
-                            fontWeight: "700",
-                            background: "linear-gradient(to right, #ff2e63, #ff7f50, #ffd662)",
-                            color: "white",
-                            boxShadow: "0 4px 14px rgba(255,100,140,0.4)",
-                            "&:hover": {
-                                background: "linear-gradient(to right, #ff1e52, #ff6f40, #ffca52)"
-                            }
-                        }}
-                        onClick={handleLogin}
-                    >
-                        Login
-                    </Button>
-
-                    {/* Divider */}
-                    <Divider sx={{ my: 2, borderColor: "rgba(255,255,255,0.3)" }}>Or</Divider>
-
-                    {/* Login with Google */}
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        startIcon={<FcGoogle />}
-
-                        sx={{
-                            py: 1.5,
-                            borderRadius: "12px",
-                            textTransform: "none",
-                            fontWeight: 600,
-                            borderColor: "rgba(255,255,255,0.3)",
-                            color: "white",
-                            "&:hover": { borderColor: "rgba(255,255,255,0.6)" }
-                        }}
-                        onClick={signInWithGoogle}
-                    >
-                        Login with Google
-                    </Button>
-
-                    {/* Register link */}
-                    <div className="mt-4 text-center text-sm">
-                        <span>Bạn chưa có tài khoản? </span>
-                        <button
-                            type="button"
-                            onClick={handleClickOpenRegister}
-                            className="text-pink-500 underline font-medium"
-                        >
-                            Register
-                        </button>
-                    </div>
-                </form>
-            </DialogContent>
-        </Dialog>
+                        {/* Register link */}
+                        <div className="mt-4 text-center text-sm">
+                            <span>Bạn chưa có tài khoản? </span>
+                            <button
+                                type="button"
+                                onClick={handleClickOpenRegister}
+                                className="text-pink-500 underline font-medium"
+                            >
+                                Register
+                            </button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
+            <ForgotPassword  openForgotPassword={openForgotPassword} handleCloseForgotPassword={handleCloseForgotPassword} Transition={Transition}  />
+        </>
     );
 
 }

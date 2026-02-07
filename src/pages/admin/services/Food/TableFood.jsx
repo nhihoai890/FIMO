@@ -115,7 +115,7 @@ function TableFood({ handleEditFood }) {
                   />
                 </CyberCell>
                 <CyberCell>{f.name}</CyberCell>
-                <CyberCell sx={{ color: '#0ff' }}>{f.price}</CyberCell>
+                <CyberCell sx={{ color: '#0ff' }}>{Number(f.price).toLocaleString("vi-VN")} đ</CyberCell>
                 <CyberCell sx={{ color: '#0ff' }}>{getOjectById(cinemaLocations, f.idCinemaLocation)?.name}</CyberCell>
                 <CyberCell sx={{ color: '#f39c12' }}>{f.discount} %</CyberCell>
                 <CyberCell align="center">

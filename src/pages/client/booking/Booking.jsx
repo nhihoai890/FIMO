@@ -39,20 +39,42 @@ function Booking() {
             alert("vui long dang nhap");
             return;
         }
+   
+        
+        // check ban da duoc giu cho 
+        let colD;
+        // check idchair == ban doi kiem tra col chan le 
+        if (value.idChair == "Zz54Ux3eOaxsOucCXKhW") {
+            colD = value.col % 2 == 0 ? value.col + 1 : value.col - 1;
+        }
         // xem da tung booking xuat chieu nay chua 
         const oldBooking = bookings.find(e => e.idMovieScreening == id && e.idAccount == isLogin.id && e.time == showtime);
+
         if (oldBooking) {
+            //check ban da dat truoc do chua
             const check = oldBooking.listChair.findIndex(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair);
             if (check != -1) {
-                oldBooking.listChair = oldBooking.listChair.filter((_, index) => index != check);
+                if (colD) {   
+                    oldBooking.listChair = oldBooking.listChair.filter((s, index) => index != check );
+                     oldBooking.listChair = oldBooking.listChair.filter((s, index) => s.col != colD  );
+                   console.log(oldBooking.listChair);
+                   
+                    
+                } else {
+                    oldBooking.listChair = oldBooking.listChair.filter((_, index) => index != check);
+                }
+                // oldBooking.listChair = []
                 await updateDocument("bookings", oldBooking);
             } else {
-                oldBooking.listChair.push(value);
+                if (colD) {
+                    oldBooking.listChair.splice(0, 0, value, { ...value, col: colD, seatCode: value.seatCode.replace(/\d/g, "") + (colD + 1) });
+                } else {
+                    oldBooking.listChair.push(value);
+                }
                 await updateDocument("bookings", oldBooking);
             }
         } else {
             const newBooking = { idMovieScreening: id, idAccount: isLogin?.id, time: showtime, listChair: [value] };
-            console.log(newBooking);
 
             await addDocument("bookings", newBooking);
         }
@@ -93,7 +115,13 @@ function Booking() {
         }, 0);
     }, [selectBooking, typeChairs]);
 
-
+    const handleContinue = (e) => {
+        if (!selectBooking || selectBooking.listChair.length === 0) {
+            e.preventDefault();
+            alert("Vui long chon it nhat 1 ghe");
+            return;
+        }
+    }
 
 
     return (
@@ -157,7 +185,7 @@ function Booking() {
 
                 <div className="flex justify-between pt-4 gap-2">
                     <button onClick={handleClearBooking} className="flex-1 px-4 py-3 rounded-xl bg-gray-700 hover:bg-gray-600 transition">Quay lại</button>
-                    <Link to={`/order/${selectBooking?.id}/${cinemaShow?.id}`}>
+                    <Link to={`/order/${selectBooking?.id}/${cinemaShow?.id}`} onClick={handleContinue}>
                         <button className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 hover:scale-105 transition text-white font-semibold">Tiếp tục</button>
                     </Link>
 

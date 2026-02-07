@@ -20,7 +20,7 @@ const Item = styled(Paper)(() => ({
 function ShowRoomBooking({ data, handleBooking, showImgUrl }) {
     const [grid, setGrid] = useState([]);
     const typeChairs = useContext(TypeChairsContext);
-
+    const isSoldSeat = (seatObj) => showImgUrl(seatObj) === seat
 
     useEffect(() => {
         if (!data) return;
@@ -90,11 +90,16 @@ function ShowRoomBooking({ data, handleBooking, showImgUrl }) {
                 }}
             >
                 {generateSeatCodes(grid.flat())?.map((e, index) => {
+                    const sold = isSoldSeat(e);
                     const rowIndex = Math.floor(index / data.columns);
                     const colIndex = index % data.columns;
                     const key = `${rowIndex}-${colIndex}`;
                     return (
-                        <Box key={key} sx={{ position: 'relative' }} onClick={() => handleBooking(e)}>
+
+                        <Box key={key} sx={{ position: 'relative' }} onClick={() => {
+                            if (sold) return;     
+                            handleBooking(e);
+                        }}>
                             <img
                                 src={showImgUrl(e)}
                                 alt="#"

@@ -74,7 +74,7 @@ function StepOrderFood({ booking, orderItem, setOrderItem }) {
                                             {f.name}
                                         </h3>
                                         <p className="text-orange-500 font-extrabold mt-1">
-                                            {f.price.toLocaleString()} đ
+                                            {Number(f.price).toLocaleString("vi-VN")} đ
                                         </p>
                                     </div>
 

@@ -225,6 +225,7 @@ function ModalOrders({ open, handleClose }) {
                 id_order: orderNew.id,
             }));
             await Promise.all(newFoods.map((item) => addDocument("OrderDetails", item)));
+            handleClose();
         }
         setActiveStep((s) => Math.min(s + 1, 2));
     };

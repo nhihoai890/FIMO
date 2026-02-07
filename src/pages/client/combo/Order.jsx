@@ -149,7 +149,7 @@ function Order() {
                                     {f.name}
                                 </h3>
                                 <p className="text-orange-500 font-extrabold mt-1">
-                                    {f.price.toLocaleString()} đ
+                                    {Number(f.price).toLocaleString("vi-VN")} đ
                                 </p>
                             </div>
 
@@ -182,10 +182,12 @@ function Order() {
             <div className="fixed bottom-0 left-0 w-full bg-[#111] border-t border-gray-800">
                 <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
                     {/* Back */}
-                    <button className="flex items-center gap-2 text-gray-300 hover:text-white transition">
+                    <Link to={`/booking/${bookingName?.idMovieScreening}/${bookingName?.time}`}>
+                         <button className="flex items-center gap-2 text-gray-300 hover:text-white transition">
                         <FiArrowLeft />
                         Quay lại
                     </button>
+                    </Link>
                      
                     <div className='flex  items-center gap-3 text-sm text-gray-300'>
                         <img src={movie?.imgUrl} alt={movie?.name} className="w-12 h-16 object-cover rounded-md" />
@@ -205,7 +207,7 @@ function Order() {
                         <div className="text-right">
                             <p className="text-sm text-gray-400">Tổng tiền</p>
                             <p className="text-xl font-extrabold text-orange-500">
-                                {totalPrice.toLocaleString()} đ
+                                {Number(totalPrice).toLocaleString("vi-VN")} đ
                             </p>
                         </div>
                         
