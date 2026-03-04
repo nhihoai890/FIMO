@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import SearchAdmin from '../../../../components/admin/SearchAdmin';
 import ModalMovieScreen from './ModalMovieScreen';
 import { addDocument, updateDocument } from '../../../../services/firebaseService';
 import TableMovieScreening from './TableMovieScreening';
+import { MovieScreeningContext } from '../../../../contexts/MovieScreeningProvider';
 const inner = { list_showtime: [], idMovie: "", ratio: "", release_date: "", idCity: "", idCinemaLocation: "", idRoom: "" }
 function MovieScreening(props) {
+    const movieScreens = useContext(MovieScreeningContext);
     const [open, setOpen] = useState(false);
     const [movieScreen, setMovieScreen] = useState(inner);
     const [error, setError] = useState(inner);
+    const [filterScreens, setFilterScreen] = useState([]);
+
+    useEffect(() => {
+        setFilterScreen(movieScreens || []);
+    }, [movieScreens]);
     const handleClickOpen = () => {
         setMovieScreen(inner);
         setError({ ...inner, list_showtime: "" });
@@ -56,11 +63,16 @@ function MovieScreening(props) {
         handleClickOpen();
         setMovieScreen(msc);
     }
+    const handleSearch = (query) => {
+        const q = query.trim().toLowerCase();
+        const filtered = movieScreens.filter(mc => mc.idCinemaLocation.toLowerCase().includes(q))
+        setFilterScreen(filtered)
+    }
 
     return (
         <>
-            <SearchAdmin title="List MovieScreen" placeholder="Search MovieScreen..." handleClickOpen={handleClickOpen} />
-            <TableMovieScreening handleEdit={handleEdit} />
+            <SearchAdmin title="List MovieScreen" placeholder="Search MovieScreen..." handleClickOpen={handleClickOpen} onSearch={handleSearch} />
+            <TableMovieScreening handleEdit={handleEdit} movieScreens={filterScreens} />
             <ModalMovieScreen addMovieScreen={addMovieScreen} error={error} setMovieScreen={setMovieScreen} handleClose={handleClose} open={open} movieScreen={movieScreen} handleInput={handleInput} />
         </>
 

@@ -70,7 +70,7 @@ function HeaderAdmin(props) {
 
                   <li onClick={() => {
                     logout();
-                    navigate("/main")
+                    navigate("/")
                   }} className="px-4 py-2 hover:bg-cyan-900/30 hover:text-white cursor-pointer transition">
                     Đăng xuất
                   </li>

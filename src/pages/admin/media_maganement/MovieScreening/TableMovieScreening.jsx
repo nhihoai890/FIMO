@@ -24,8 +24,7 @@ import ModalDeleted from '../../../../components/admin/ModalDeleted';
 import { deleteDocument } from '../../../../services/firebaseService';
 import PaginationTablePage from '../../../../components/admin/PaginationTablePage';
 
-function TableMovieScreening({ handleEdit }) {
-  const movieScreens = useContext(MovieScreeningContext);
+function TableMovieScreening({ handleEdit, movieScreens }) {
   const movies = useContext(MoviesContext);
   const cities = useContext(CitiesContext);
   const cinemas = useContext(CinemaLocationsContext);
@@ -99,7 +98,7 @@ function TableMovieScreening({ handleEdit }) {
 
           <TableBody>
             {movieScreens.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((ms, index) => {
-            const roomSelected = getOjectById(rooms, ms.idRoom);
+              const roomSelected = getOjectById(rooms, ms.idRoom);
 
 
               return (
@@ -157,7 +156,9 @@ function TableMovieScreening({ handleEdit }) {
                           },
                         }}
                       >
-                        <IoTime size={24} className="cursor-pointer text-cyan-400 hover:text-cyan-200" />
+                        <span>
+                          <IoTime size={24} className="cursor-pointer text-cyan-400 hover:text-cyan-200" />
+                        </span>
                       </Tooltip>
                     ) : (
                       <span style={{ color: '#555' }}>No showtime</span>
@@ -178,7 +179,7 @@ function TableMovieScreening({ handleEdit }) {
                   <TableCell >
                     {roomSelected ? (
                       <Tooltip
-                        title={roomSelected.name}
+                        title={roomSelected?.name?.trim() || "No room"}
                         arrow
                         placement="top"
                         componentsProps={{
@@ -193,8 +194,11 @@ function TableMovieScreening({ handleEdit }) {
                           },
                         }}
                       >
-                        <MdOutlineMeetingRoom size={24} className="cursor-pointer text-cyan-400 hover:text-cyan-200" />
+                        <span style={{ display: "inline-flex" }}>
+                          <MdOutlineMeetingRoom size={24} className="cursor-pointer text-cyan-400 hover:text-cyan-200" />
+                        </span>
                       </Tooltip>
+
                     ) : "—"}
                   </TableCell>
 

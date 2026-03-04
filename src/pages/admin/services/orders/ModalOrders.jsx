@@ -96,7 +96,7 @@ const NeonButton = styled(Button)(() => ({
 }));
 
 /* ================= COMPONENT ================= */
-const inner = { idCity: "", idCinemaLocation: "", idMovie: "", idMovieScreening: "", idRoom: "", timeMovieScreen: "", listchair: [], idAccount: "booking tai quay", createAt: new Date(), method:"booking tai quay" }
+const inner = { idCity: "", idCinemaLocation: "", idMovie: "", idMovieScreening: "", idRoom: "", timeMovieScreen: "", listchair: [], idAccount: "booking tai quay", createAt: new Date(), method: "booking tai quay" }
 function ModalOrders({ open, handleClose }) {
     const cities = useContext(CitiesContext);
     const cinemaLocations = useContext(CinemaLocationsContext);
@@ -151,7 +151,7 @@ function ModalOrders({ open, handleClose }) {
 
     const showImgUrl = (value) => {
         console.log(booking.timeMovieScreen);
-        
+
         const checkOrder = orders.some(
             e =>
                 e.idMovieScreening == booking.idMovieScreening &&
@@ -174,24 +174,55 @@ function ModalOrders({ open, handleClose }) {
     };
 
     const handleBooking = async (value) => {
-        const sameChair = (c) =>
-            c.row == value.row && c.col == value.col && c.idChair == value.idChair;
+        const isCouple = value.idChair === "Zz54Ux3eOaxsOucCXKhW";
+        let newListChair = [...(booking.listchair || [])]
 
-        const existed = (booking.listchair || []).some(sameChair);
+        const sameChair = (c, v) =>
+            c.row === v.row &&
+            c.col === v.col &&
+            c.idChair === v.idChair;
 
-        const newListChair = existed
-            ? (booking.listchair || []).filter((c) => !sameChair(c))
-            : [...(booking.listchair || []), value];
+        const existed = newListChair.some(c => sameChair(c, value));
 
-        const updatedLocal = { ...booking, listchair: newListChair };
-        setBooking(updatedLocal);
+        if (isCouple) {
+            const pairCol = value.col % 2 === 0
+                ? value.col + 1
+                : value.col - 1;
 
+            const pairSeat = {
+                ...value,
+                col: pairCol,
+                seatCode: value.seatCode.replace(/\d/g, "") + (pairCol + 1)
+            };
 
-        if (updatedLocal.id) await updateDocument("bookings", updatedLocal);
-        else {
-            const created = await addDocument("bookings", updatedLocal);
-            setBooking(created || updatedLocal);
+            if (existed) {
+                newListChair = newListChair.filter(
+                    c => !sameChair(c, value) &&
+                        !sameChair(c, pairSeat)
+                );
+            } else {
+                newListChair.push(value, pairSeat);
+            }
+        } else {
+            if (existed) {
+                newListChair = newListChair.filter(c => !sameChair(c, value));
+
+            } else {
+                newListChair.push(value);
+            }
         }
+
+        const updateLocal = { ...booking, listchair: newListChair };
+        setBooking(updateLocal);
+
+        if (updateLocal.id) {
+            await updateDocument("bookings", updateLocal);
+
+        } else {
+            const created = await addDocument("bookings", updateLocal);
+            setBooking(created || updateLocal);
+        }
+
     };
 
 
@@ -208,6 +239,31 @@ function ModalOrders({ open, handleClose }) {
         else setActiveStep((s) => s - 1);
     };
 
+
+
+    const totalChair = useMemo(() => {
+        if (!booking) return 0;
+
+        return booking.listchair.reduce((total, chair) => {
+            const typeChair = getOjectById(typeChairs, chair.idChair);
+            const price = typeChair?.price || 0;
+            const ratio = getOjectById(movieScreens, booking.idMovieScreening)?.ratio || 1;
+            return total + price * ratio;
+        }, 0);
+    }, [booking, typeChairs, movieScreens]);
+
+    const totalFood = useMemo(() => {
+        if (!orderItem.length) return 0;
+        return orderItem.reduce((total, item) => {
+            const food = getOjectById(foods, item.idFood);
+            const price = food?.price;
+            return total + price * item.quantity
+        }, 0)
+    }, [orderItem, foods])
+    const totalPrice = useMemo(() => {
+        return totalChair + totalFood;
+    }, [totalChair, totalFood]);
+
     const handleNext = async () => {
         if (activeStep === 0) {
             if (!canGoNextFromBooking) return;
@@ -219,7 +275,9 @@ function ModalOrders({ open, handleClose }) {
         }
 
         if (activeStep === 2) {
-            const orderNew = await addDocument("orders", {...booking, total: totalPrice});
+            console.log(totalChair);
+            
+            const orderNew = await addDocument("orders", { ...booking, total: totalPrice, totalChair: totalChair, totalFood: totalFood });
             const newFoods = orderItem?.map(({ id, ...rest }) => ({
                 ...rest,
                 id_order: orderNew.id,
@@ -230,29 +288,6 @@ function ModalOrders({ open, handleClose }) {
         setActiveStep((s) => Math.min(s + 1, 2));
     };
 
-    
-        const totalChair = useMemo(() => {
-            if (!booking) return 0;
-    
-            return booking.listchair.reduce((total, chair) => {
-                const typeChair = getOjectById(typeChairs, chair.idChair);
-                const price = typeChair?.price || 0;
-                const ratio = getOjectById(movieScreens, booking.idMovieScreening)?.ratio || 1;
-                return total + price * ratio;
-            }, 0);
-        }, [booking, typeChairs, movieScreens]);
-    
-        const totalFood = useMemo(() => {
-            if (!orderItem.length) return 0;
-            return orderItem.reduce((total, item) => {
-                const food = getOjectById(foods, item.idFood);
-                const price = food?.price;
-                return total + price * item.quantity
-            }, 0)
-        }, [orderItem, foods])
-        const totalPrice = useMemo(() => {
-            return totalChair + totalFood;
-        }, [totalChair, totalFood]); 
     return (
         <>
             <CyberDialog

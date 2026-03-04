@@ -18,6 +18,7 @@ import ModalChooseMovie from './ModalChooseMovie';
 import { MoviesContext } from '../../../../contexts/MovieProvider';
 import ShowRoom from '../../seating/Room/ShowRoom';
 import { RoomsContext } from '../../../../contexts/RoomProvider';
+import { MovieScreeningContext } from '../../../../contexts/MovieScreeningProvider';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;

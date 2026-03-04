@@ -1,18 +1,24 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import ModalMovie from './ModalMovie';
 import SearchAdmin from '../../../../components/admin/SearchAdmin';
 import logo from "../../../../assets/logo.png"
 import { addDocument, updateDocument } from '../../../../services/firebaseService';
 import TableMovie from './TableMovie';
+import { MoviesContext } from '../../../../contexts/MovieProvider';
 
 const inner = { name: "", description: "", idDirector: "", duration: "", listActor: [], listCate: [], ageLimit: "", imgUrl: logo, urlTrailer: "" }
 function Movie(props) {
-
+  const movies = useContext(MoviesContext);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(inner);
   const [movie, setMovie] = useState(inner);
   const [loading, setLoading] = useState(false);
+  const [filterMovies, setFilterMovies] = useState([]);
+
+  useEffect(() => {
+    setFilterMovies(movies)
+  }, [movies]);
 
   const handleInputMovie = (e) => {
     setMovie({ ...movie, [e.target.name]: e.target.value })
@@ -73,12 +79,17 @@ function Movie(props) {
     setError(newError);
     return Object.values(newError).some(e => e !== "");
   }
+
+  const handleSearch = (query) => {
+    const filtered = movies.filter(movie => movie.name.toLowerCase().includes(query.toLowerCase().trim()));
+    setFilterMovies(filtered)
+  }
   return (
     <div >
       <SearchAdmin title="List Movie"
         placeholder="Search Movie...."
-        handleClickOpen={handleClickOpen} />
-      <TableMovie handleEditMovie={handleEditMovie} />
+        handleClickOpen={handleClickOpen} onSearch={handleSearch} />
+      <TableMovie handleEditMovie={handleEditMovie} movies={filterMovies} />
       <ModalMovie loading={loading} handleImageChangeMovie={handleImageChangeMovie} error={error} movie={movie} setMovie={setMovie} open={open} handleClose={handleClose} handleInputMovie={handleInputMovie} handleAddMovie={handleAddMovie} />
     </div>
   );

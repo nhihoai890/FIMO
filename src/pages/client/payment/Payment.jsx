@@ -65,6 +65,8 @@ function Payment(props) {
             timeMovieScreen: booking?.time,
             listchair: booking?.listChair,
             total: totalPrice,
+            totalChair: totalChair,
+            totalFood: totalFood,
             timePayment: new Date(),
             method: "paypal",
             transactionId: transactionId,

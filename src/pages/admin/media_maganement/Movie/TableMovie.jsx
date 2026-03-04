@@ -14,8 +14,7 @@ import PaginationTablePage from '../../../../components/admin/PaginationTablePag
 import ShowCategories from './ShowCategories';
 import ShowActors from './ShowActors';
 
-function TableMovie({ handleEditMovie }) {
-  const movies = useContext(MoviesContext);
+function TableMovie({ handleEditMovie, movies }) {
   const directors = useContext(DirectorsContext);
   const [open, setOpen] = useState(false);
   const [movieDelete, setMovieDelete] = useState(null);
@@ -74,6 +73,8 @@ function TableMovie({ handleEditMovie }) {
           {/* Body */}
           <TableBody>
             {movies.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((mv, index) => (
+
+
               <TableRow
                 key={mv.id}
                 sx={{
@@ -116,11 +117,18 @@ function TableMovie({ handleEditMovie }) {
 
                 <TableCell>
                   <Tooltip title={<ShowCategories data={mv.listCate || []} />} arrow>
-                    <PiFilmReelFill size={20} color="#00ffff" style={{ filter: 'drop-shadow(0 0 4px #00ffff)' }} />
+                    <span style={{ display: 'inline-flex' }}>
+                      <PiFilmReelFill
+                        size={20}
+                        color="#00ffff"
+                        style={{ cursor: 'pointer', filter: 'drop-shadow(0 0 4px #00ffff)' }}
+                      />
+                    </span>
                   </Tooltip>
                 </TableCell>
 
-             
+
+
 
 
                 <TableCell>
