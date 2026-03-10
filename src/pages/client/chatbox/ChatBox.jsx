@@ -23,12 +23,12 @@ function ChatBox(props) {
             { role: "user", content: input }
         ];
         console.log(newMessages);
-        
+
         setMessages(newMessages);
         setInput("");
         setLoading(true);
         console.log();
-        
+
         try {
             const model = genAI.getGenerativeModel({
                 model: "gemini-3-flash-preview",
@@ -89,26 +89,40 @@ function ChatBox(props) {
                     <div className="flex-1 p-3 overflow-y-auto space-y-3 bg-gray-50">
 
                         {/* Message from support */}
-                        <div className="flex items-start gap-2">
-                            <img
-                                src="https://img.freepik.com/free-photo/androgynous-avatar-non-binary-queer-person_23-2151100221.jpg?semt=ais_rp_50_assets&w=740&q=80"
-                                className="w-7 h-7 rounded-full"
-                            />
-                            <div className="bg-white text-black p-2 rounded-lg shadow text-sm max-w-[70%]">
-                                {messages.map((mes, i) => (
-                                    <div key={i} className={`message ${mes.role}`}>
-                                        {mes.content}</div>
-                                ))}
-                                {loading && <div className=''>AI đang trả lời...</div>}
-                            </div>
-                        </div>
+                        {messages.map((mes, i) => (
+                            <div
+                                key={i}
+                                className={`flex ${mes.role === "user" ? "justify-end" : "justify-start"}`}
+                            >
+                                {mes.role !== "user" && (
+                                    <img
+                                        src="https://img.freepik.com/free-photo/androgynous-avatar-non-binary-queer-person_23-2151100221.jpg?semt=ais_rp_50_assets&w=740&q=80"
+                                        className="w-7 h-7 rounded-full mr-2"
+                                    />
+                                )}
 
-                        {/* Message from user */}
-                        {/* <div className="flex justify-end">
-                            <div className="bg-orange-500 text-white p-2 rounded-lg text-sm max-w-[70%]">
-                                Tôi muốn hỏi về đặt vé
+                                <div
+                                    className={`p-2 rounded-lg shadow text-sm max-w-[70%] ${mes.role === "user"
+                                            ? "bg-orange-500 text-white"
+                                            : "bg-white text-black"
+                                        }`}
+                                >
+                                    {mes.content}
+                                </div>
                             </div>
-                        </div> */}
+                        ))}
+
+                        {loading && (
+                            <div className="flex items-start gap-2">
+                                <img
+                                    src="https://img.freepik.com/free-photo/androgynous-avatar-non-binary-queer-person_23-2151100221.jpg?semt=ais_rp_50_assets&w=740&q=80"
+                                    className="w-7 h-7 rounded-full"
+                                />
+                                <div className="bg-white text-black p-2 rounded-lg shadow text-sm">
+                                    AI đang trả lời...
+                                </div>
+                            </div>
+                        )}
 
                     </div>
 
