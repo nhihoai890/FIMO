@@ -110,3 +110,7 @@ export const initialOptions = {
    currency: "USD",
    intent: "capture"
 };
+
+export const YOUR_SERVICE_ID = "service_uzd08zm";
+export const YOUR_TEMPLATE_ID = "template_5qlfuv6";
+export const YOUR_USER_ID = "ZHvj0TjYyWVCn2jql";

@@ -21,6 +21,7 @@
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.9.1",
     "chart.js": "^4.5.1",
+    "emailjs-com": "^3.2.0",
     "firebase": "^12.3.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.3.1",

@@ -11,9 +11,9 @@ import { getOjectById } from '../../../utils/functionContants';
 import { TypeChairsContext } from '../../../contexts/TypeChairProvider';
 import { FoodsContext } from '../../../contexts/FoodProvider';
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
-import { initialOptions } from '../../../utils/Contants';
+import { initialOptions, YOUR_SERVICE_ID, YOUR_TEMPLATE_ID, YOUR_USER_ID } from '../../../utils/Contants';
 import { addDocument, deleteDocument } from '../../../services/firebaseService';
-
+import emailjs from 'emailjs-com';
 
 function Payment(props) {
 
@@ -44,7 +44,8 @@ function Payment(props) {
             return total + price * ratio;
         }, 0);
     }, [booking, typeChairs, movieScreening]);
-
+    console.log(isLogin);
+    
     const totalFood = useMemo(() => {
         if (!selectFoods.length) return 0;
         return selectFoods.reduce((total, item) => {
@@ -77,6 +78,20 @@ function Payment(props) {
             ...rest,
             id_order: order.id,
         }));
+        const newEmail = {
+            nameCustomer: isLogin.name || "",
+            movieName: movie?.name,
+            timeMovieScreen: movieScreening?.release_date,
+            address: cinemaShow?.address,
+            seats: booking?.listChair.map(e => e.seatCode).join(","),
+            toEmail: isLogin.email
+        }
+        emailjs.send(YOUR_SERVICE_ID, YOUR_TEMPLATE_ID, newEmail, YOUR_USER_ID)
+                .then((response) => {
+                    console.log(`Email sent successfully to ${fav.userId}!`);
+                }, (error) => {
+                    console.error(`Failed to send email to ${fav.userId}:`, error);
+                });
         await Promise.all(newFoods.map((item) => addDocument("OrderDetails", item)));
         await Promise.all(selectFoods.map((item) => deleteDocument("itemFoods", item)));
         navigate("/history")
