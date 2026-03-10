@@ -1,7 +1,7 @@
 export const MENUCINEMA = [
     {
         name: "Trang Chủ",
-        path: "/main",
+        path: "/",
         items : []
     },
      

@@ -43,7 +43,7 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
 
           {/* LOGO */}
-          <Link to="/main" className="flex items-center gap-3 group">
+          <Link to="/" className="flex items-center gap-3 group">
             <img
               src={fimo}
               alt="logo"

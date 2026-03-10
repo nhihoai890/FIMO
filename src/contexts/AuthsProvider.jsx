@@ -9,8 +9,14 @@ function AuthsProvider({ children }) {
 
     const loginContext = (userData) => {
         setIsLogin(userData);
-        localStorage.setItem('login', JSON.stringify(userData))
-    }
+        localStorage.setItem('login', JSON.stringify(userData));
+
+        if (userData.role === "admin") {
+            navigate("/");        
+        } else {
+            navigate("/main");   
+        }
+    };
     const logout = () => {
         setIsLogin(null);
         localStorage.removeItem('login');
@@ -24,7 +30,7 @@ function AuthsProvider({ children }) {
         }
     }, [])
     return (
-        <AuthContext.Provider value={{ loginContext , isLogin , logout }}>
+        <AuthContext.Provider value={{ loginContext, isLogin, logout }}>
             {children}
         </AuthContext.Provider>
     );

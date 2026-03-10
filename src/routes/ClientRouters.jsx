@@ -46,7 +46,7 @@ function ClientRouters(props) {
         },
 
         {
-            path: "/main",
+            path: "/",
             element: <Main />
         },
 
@@ -85,7 +85,6 @@ function ClientRouters(props) {
     return (
         <div>
             <Routes>
-                 <Route  path="/" element={<Main />} />
                 {
                     routers.map(e => (
                         <Route  key={e.path} path={e.path} element={e.element} />

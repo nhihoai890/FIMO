@@ -96,7 +96,7 @@ const NeonButton = styled(Button)(() => ({
 }));
 
 /* ================= COMPONENT ================= */
-const inner = { idCity: "", idCinemaLocation: "", idMovie: "", idMovieScreening: "", idRoom: "", timeMovieScreen: "", listchair: [], idAccount: "booking tai quay", createAt: new Date(), method: "booking tai quay" }
+const inner = { idCity: "", idCinemaLocation: "", idMovie: "", idMovieScreening: "", idRoom: "", timeMovieScreen: "", listchair: [], idAccount: "booking tai quay", timePayment: new Date(), method: "booking tai quay" }
 function ModalOrders({ open, handleClose }) {
     const cities = useContext(CitiesContext);
     const cinemaLocations = useContext(CinemaLocationsContext);

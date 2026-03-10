@@ -34,9 +34,25 @@ function Booking() {
     const movieShow = useMemo(() => getOjectById(movies, showRoom.idMovie), [showRoom, id]);
     const cinemaShow = useMemo(() => getOjectById(cinemaLocations, showRoom.idCinemaLocation), [showRoom, id])
 
+    useEffect(() => {
+        if (!selectBooking) return;
+
+        const clearOldBooking = async () => {
+            if (selectBooking.listChair.length > 0) {
+                await updateDocument("bookings", {
+                    ...selectBooking,
+                    listChair: []
+                });
+            }
+        };
+
+        clearOldBooking();
+
+    }, [id, showtime]);
+
     const handleBooking = async (value) => {
         if (!isLogin) {
-            alert("vui long dang nhap");
+            alert("Vui lòng đăng nhập");
             return;
         }
 
@@ -44,85 +60,131 @@ function Booking() {
         const colD = isCouple ? (value.col % 2 === 0 ? value.col + 1 : value.col - 1) : null;
 
         const oldBooking = bookings.find(
-            e => e.idMovieScreening === id && e.idAccount === isLogin.id && e.time === showtime
+            e => e.idMovieScreening === id &&
+                e.idAccount === isLogin.id &&
+                e.time === showtime
         );
 
-        // so sánh đúng 1 ghế
         const sameSeat = (s, v) =>
-            s.idChair === v.idChair && s.row === v.row && s.col === v.col;
+            s.idChair === v.idChair &&
+            s.row === v.row &&
+            s.col === v.col;
 
         if (oldBooking) {
-            const existed = oldBooking.listChair.some(s => sameSeat(s, value));
+
+            let newListChair = [...oldBooking.listChair];
+
+            const existed = newListChair.some(s => sameSeat(s, value));
 
             if (existed) {
-                // ✅ BỎ GHẾ: bỏ ghế đang bấm + nếu là ghế đôi thì bỏ luôn ghế còn lại (cùng row + idChair)
-                oldBooking.listChair = oldBooking.listChair.filter(s => {
+
+                // BỎ GHẾ
+                newListChair = newListChair.filter(s => {
                     if (sameSeat(s, value)) return false;
-                    if (colD != null && s.idChair === value.idChair && s.row === value.row && s.col === colD) return false;
+
+                    if (
+                        colD != null &&
+                        s.idChair === value.idChair &&
+                        s.row === value.row &&
+                        s.col === colD
+                    ) return false;
+
                     return true;
                 });
 
-                await updateDocument("bookings", oldBooking);
             } else {
-                // ✅ THÊM GHẾ: nếu là ghế đôi thì thêm luôn ghế còn lại
+
                 if (colD != null) {
+
                     const pairSeat = {
                         ...value,
                         col: colD,
-                        seatCode: value.seatCode.replace(/\d/g, "") + (colD + 1),
+                        seatCode: value.seatCode.replace(/\d/g, "") + (colD + 1)
                     };
 
-                    // tránh trùng cặp trước đó
-                    oldBooking.listChair = oldBooking.listChair.filter(
-                        s => !(s.idChair === value.idChair && s.row === value.row && (s.col === value.col || s.col === colD))
+
+                    newListChair = newListChair.filter(
+                        s => !(
+                            s.idChair === value.idChair &&
+                            s.row === value.row &&
+                            (s.col === value.col || s.col === colD)
+                        )
                     );
 
-                    oldBooking.listChair.push(value, pairSeat);
-                } else {
-                    oldBooking.listChair.push(value);
-                }
+                    newListChair.push(value, pairSeat);
 
-                await updateDocument("bookings", oldBooking);
+                } else {
+
+                    newListChair.push(value);
+
+                }
             }
+
+            await updateDocument("bookings", {
+                ...oldBooking,
+                listChair: newListChair
+            });
+
         } else {
-            // chưa có booking
+
+            let listChair = [value];
+
             if (colD != null) {
                 const pairSeat = {
                     ...value,
                     col: colD,
-                    seatCode: value.seatCode.replace(/\d/g, "") + (colD + 1),
+                    seatCode: value.seatCode.replace(/\d/g, "") + (colD + 1)
                 };
-                await addDocument("bookings", {
-                    idMovieScreening: id,
-                    idAccount: isLogin.id,
-                    time: showtime,
-                    listChair: [value, pairSeat],
-                });
-            } else {
-                await addDocument("bookings", {
-                    idMovieScreening: id,
-                    idAccount: isLogin.id,
-                    time: showtime,
-                    listChair: [value],
-                });
+
+                listChair = [value, pairSeat];
             }
+
+            await addDocument("bookings", {
+                idMovieScreening: id,
+                idAccount: isLogin.id,
+                time: showtime,
+                listChair
+            });
         }
     };
 
     const showImgUrl = (value) => {
-        const checkOrder = orders.some(e => e.idMovieScreening == id && e.timeMovieScreen == showtime && e.listchair.some(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair))
-        const check = bookings.some(e => e.idMovieScreening == id && e.idAccount == isLogin?.id && e.time == showtime
-            && e.listChair.some(c => c.row == value.row && c.col == value.col && c.idChair == value.idChair));
-        return checkOrder ? seat : check ? selected : getOjectById(typeChairs, value.idChair)?.imgUrl;
-    }
+
+        const checkOrder = orders?.some(e =>
+            e.idMovieScreening == id &&
+            e.timeMovieScreen == showtime &&
+            e.listchair.some(c =>
+                c.row == value.row &&
+                c.col == value.col &&
+                c.idChair == value.idChair
+            )
+        );
+
+        const checkBooking = bookings?.some(e =>
+            e.idMovieScreening == id &&
+            e.idAccount == isLogin?.id &&
+            e.time == showtime &&
+            e.listChair.some(c =>
+                c.row == value.row &&
+                c.col == value.col &&
+                c.idChair == value.idChair
+            )
+        );
+
+        if (checkOrder) return seat;       // ghế đã bán
+        if (checkBooking) return selected; // ghế đang chọn
+
+        return getOjectById(typeChairs, value.idChair)?.imgUrl;
+    };
 
     const selectBooking = useMemo(() => {
+        if (!bookings) return null;
         return bookings.find(b =>
             b.idMovieScreening == id &&
             b.idAccount == isLogin?.id &&
             b.time == showtime
         );
-    }, [bookings, id, isLogin, showtime]);
+    }, [bookings, id, isLogin?.id, showtime]);
 
 
     const handleClearBooking = async () => {
@@ -135,12 +197,13 @@ function Booking() {
     };
 
     const totalPrice = useMemo(() => {
-        if (!selectBooking) return 0;
+        if (!selectBooking || selectBooking.listChair.length === 0) return 0;
 
         return selectBooking.listChair.reduce((total, chair) => {
             const typeChair = getOjectById(typeChairs, chair.idChair);
             return total + Number(typeChair?.price || 0);
         }, 0);
+
     }, [selectBooking, typeChairs]);
 
     const handleContinue = (e) => {

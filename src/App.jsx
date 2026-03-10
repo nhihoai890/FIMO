@@ -22,6 +22,7 @@ function App() {
       </div> : <div className=' relative z-1'>
         <Home />
       </div>}
+      
     </>
   )
 }
