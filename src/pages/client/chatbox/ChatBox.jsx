@@ -15,6 +15,8 @@ function ChatBox(props) {
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const movies = useContext(MoviesContext);
+    const movieContext = movies.map(m => `${m.name} (${m.ageLimit}, ${m.duration})`)
+    
     const sendMessage = async () => {
         if (!input.trim()) return;
 
@@ -35,10 +37,17 @@ function ChatBox(props) {
                 contents: "Explain how AI works in a few words",
             });
 
-            const result = await model.generateContent(
-                newMessages.map(m => m.content).join("\n")
-            );
+            const prompt = `
+Bạn là AI tư vấn phim.
 
+Danh sách phim:
+${movieContext}
+
+Người dùng hỏi: ${input}
+
+Hãy gợi ý phim phù hợp.
+`;
+            const result = await model.generateContent(prompt);
             const reply = result.response.text();
 
             setMessages([
@@ -103,8 +112,8 @@ function ChatBox(props) {
 
                                 <div
                                     className={`p-2 rounded-lg shadow text-sm max-w-[70%] ${mes.role === "user"
-                                            ? "bg-orange-500 text-white"
-                                            : "bg-white text-black"
+                                        ? "bg-orange-500 text-white"
+                                        : "bg-white text-black"
                                         }`}
                                 >
                                     {mes.content}
